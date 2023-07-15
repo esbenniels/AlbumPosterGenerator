@@ -1,107 +1,140 @@
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-import os
-import re
-import matplotlib.image as img
-from datetime import datetime
-import cv2
-from cv2 import dnn_superres
-import binascii
-from PIL import Image
-import numpy as np
-import scipy
-import scipy.misc
-import scipy.cluster
-import urllib.request
-from progress.bar import Bar
-from progress.spinner import MoonSpinner
+from flask import Flask, request, render_template, url_for, redirect, flash
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
+from flask_mobility import Mobility
+from creator import handleURL
+from werkzeug.security import generate_password_hash, check_password_hash
 
-os.environ['SPOTIPY_CLIENT_ID'] = '56c47550643e42b9a6ab2aa821fe394c'
-os.environ['SPOTIPY_CLIENT_SECRET'] = '0f26f4b32912427ca59b7c62d8c36b5a'
+db = SQLAlchemy()
 
-def getAllArtistAlbums():
-    artist_uri = 'spotify:artist:3TVXtAsR1Inumwj472S9r4'
-    spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
+    albumStorageLocation = db.Column(db.String(100), unique=True)
 
-    results = spotify.artist_albums(artist_uri, album_type='album')
-    albums = results['items']
-    while results['next']:
-        results = spotify.next(results)
-        albums.extend(results['items'])
+def create_app():
+    app = Flask(__name__)
+    CORS(app)
+    Mobility(app)
 
-    for album in albums:
-        print(album['name'])
+    app.config['SECRET_KEY'] = 'esbennielsen784'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 
-def getAlbumDetails():
-    fullURL = input("Enter spotify album url: ")
-    albumID = re.findall('album/(.*)\?', fullURL)
-    spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+    db.init_app(app)
 
-    results = spotify.album(albumID[0])
-    print(results['name'])
-    release = datetime.strptime(results['release_date'], "%Y-%m-%d")
-    print(results['release_date'])
-    print(release.strftime("%d-%m-%Y"))
-    newDay = release.strftime("%d")
-    if newDay[0] == "0":
-        newDay = newDay[1]
-    goodDate = release.strftime("%B")+" "+newDay+", "+release.strftime("%Y")
-    print(goodDate)
-    print(results['label'])
-    print("Artists: ", end="")
-    for i in range(len(results['artists'])):
-        print(results['artists'][i]['name'], end="")
-        if not i == len(results['artists'])-1:
-            print(", ", end="")
-    print()
-    print("Cover Art:", results['images'][0]['url'])
-    getTopColors(results['images'][0]['url'])
-    
-    # https://open.spotify.com/album/5MS3MvWHJ3lOZPLiMxzOU6?si=6GDOWf7nSnaqsDa-BbIH5Q
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
 
-def getTopColors(online_url:str):
-    
 
-    NUM_CLUSTERS = 5
+    @login_manager.user_loader
+    def load_user(user_id):
+        # since the user_id is just the primary key of our user table, use it in the query for the user
+        return User.query.get(int(user_id))
 
-    bar = Bar("Finding dominant colors ", max=5)
-    urllib.request.urlretrieve(online_url, "album_cover.jpg")
-    bar.next()
-    # print('reading image')
-    im = Image.open("album_cover.jpg")
-    bar.next()
-    # im = im.resize((150, 150))      # optional, to reduce time
-    ar = np.asarray(im)
-    shape = ar.shape
-    ar = ar.reshape(np.prod(shape[:2]), shape[2]).astype(float)
-    bar.next()
-    # print('finding clusters')
-    codes, dist = scipy.cluster.vq.kmeans(ar, NUM_CLUSTERS)
-    # print('cluster centres:\n', codes)
-    bar.next()
-    hexes: list[str] = []
-    for i in range(5):
-        peak = codes[i]
-        hexes.append("#"+binascii.hexlify(bytearray(int(c) for c in peak)).decode('ascii'))
-    bar.next()
-    print("\nMost common colors: ", hexes)
+    # # blueprint for auth routes in our app
+    # from auth import auth as auth_blueprint
+    # app.register_blueprint(auth_blueprint)
 
-def upscaleAlbumCover():
-    print("Upscaling Image ... ")
-    print("Creating dnn_superres object ... ")
-    sr = dnn_superres.DnnSuperResImpl.create()
-    image = cv2.imread('album_cover.jpg')
-    path = "EDSR_x4.pb"
-    print("Reading model ... ")
-    sr.readModel(path)
-    sr.setModel("edsr", 2)
-    print("Upsampling ... ")
-    result = sr.upsample(image)
-    print("Saving image ... ")
-    cv2.imwrite("album_cover_upscaled.png", result)
+    # # blueprint for non-auth parts of app
+    # from server import server as server_blueprint
+    # app.register_blueprint(server_blueprint)
 
-def generateImage():
-    pass
+    with app.app_context():
+        db.create_all()
 
-getAlbumDetails()
-# upscaleAlbumCover()
+    return app
+
+app = create_app()
+
+
+
+@app.route("/index", methods=['POST', 'GET'])
+# @login_required
+def index():
+    return render_template("index.html", current_user = current_user)
+
+@app.route("/urlSubmit", methods=['POST', 'GET'])
+# @login_required
+def urlSubmit():
+    if request.method == 'GET':
+        return redirect(url_for('index'))
+    else:
+        url = request.args.get('SpotifyUrl')
+        filename = handleURL(url)
+        # server file to front end
+        flash("Album poster successfully generated")
+        return render_template("index.html", current_user, current_user)
+
+@app.route('/login')
+def login():
+    return render_template("login.html", current_user = current_user)
+
+@app.route("/loginPost", methods = ['POST'])
+def loginPost():
+    # login code goes here
+    email = request.form.get('email')
+    password = request.form.get('password')
+    remember = True if request.form.get('remember') else False
+
+    user = User.query.filter_by(email=email).first()
+
+    # check if the user actually exists
+    # take the user-supplied password, hash it, and compare it to the hashed password in the database
+    if not user or not check_password_hash(user.password, password):
+        flash('Please check your login details and try again.')
+        return redirect(url_for('login')) # if the user doesn't exist or password is wrong, reload the page
+
+    login_user(user, remember=remember)
+
+    # if the above check passes, then we know the user has the right credentials
+    return redirect(url_for('index'))
+
+@app.route('/signup')
+def signup():
+    return render_template("signup.html", current_user = current_user)
+
+@app.route("/signupPost", methods = ['POST'])
+def signupPost():
+    # code to validate and add user to database goes here
+
+    email = request.form.get('email')
+    # name = request.form.get('name')
+    password = request.form.get('password')
+
+    user = User.query.filter_by(email=email).first() # if this returns a user, then the email already exists in database
+
+    if user: # if a user is found, we want to redirect back to signup page so user can try again
+        flash("Email address already exists")
+        return redirect(url_for('signup'))
+
+    engine = db.get_engine().connect()
+    result = engine.exec_driver_sql("""SELECT id FROM user;""")
+    ids = []
+    for row in result:
+        ids.append(row[0])
+    print(ids)
+    ids = list(int(id) for id in ids)
+    max_id = max(ids)
+
+    # create a new user with the form data. Hash the password so the plaintext version isn't saved.
+    new_user = User(email=email, albumStorageLocation = "static\\PosterStorage\\user"+str(max_id+1), password=generate_password_hash(password, method='scrypt'))
+
+    # add the new user to the database
+    db.session.add(new_user)
+    db.session.commit()
+
+    user = User.query.filter_by(email=email).first()
+    login_user(user)
+    return redirect(url_for('index'))
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+
+app.run(debug=True, host = '0.0.0.0')
