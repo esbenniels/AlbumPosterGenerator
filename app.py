@@ -79,8 +79,6 @@ def urlSubmit():
 
         handleURL(url, newParams, "/user"+str(current_user.id))
         
-
-
         # server file to front end
 
 

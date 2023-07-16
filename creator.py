@@ -38,8 +38,6 @@ defaultParams = {
 def handleURL(url: str, params: dict[str, int] = defaultParams, saveFolder: str = ""):
     if "album" in url:
         createAlbumPoster(url, params, saveFolder)
-    elif "playlist" in url:
-        createPlaylistPoster(url, params, saveFolder)
     else:
         return "Not a Spotify playlist or poster URL"
 
@@ -91,14 +89,6 @@ def getAlbumDetails(url: str) -> dict:
     
     # https://open.spotify.com/album/5MS3MvWHJ3lOZPLiMxzOU6?si=6GDOWf7nSnaqsDa-BbIH5Q
 
-def getPlaylistDetails(url: str) -> dict:
-    # https://open.spotify.com/playlist/4wuGkZLDCgKVttJtfLmVmg?si=e1bc1231cf974eb6
-    albumID = re.findall('playlist/(.*)\?', url)
-    spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-
-    results = spotify.playlist(albumID[0])
-    print(results['name'])
-    pass
 
 def getTopColors() -> list[list[int]]:
     
@@ -293,13 +283,8 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
 
     canvas.save(f"static/PosterStorage{saveFolder}/poster.png")
 
-def createPlaylistPoster(url: str, params: dict[str, int] = defaultParams, saveFolder: str = ""):
-    global defaultParams
-    defaultParams = params
 
-    details = getPlaylistDetails(url)
-    # Full canvas
-    canvas = Image.new('RGBA', (1333,2000), (255,255,255))
+
 
 # spotifyURL = input("Enter album or playlist URL: ")
 # handleURL(spotifyURL)
