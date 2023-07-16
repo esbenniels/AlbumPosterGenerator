@@ -1,1 +1,23 @@
 https://www.canva.com/design/DAFoObbQJt4/9ONImJSmXjfCDpIhAPoOFw/edit
+
+album cover: 
+    spotify provides 640x640 image
+    use opencv to upscale to 1280x1280
+    image location: 83, 83
+    anchor: NW
+    image dims: 1166x1166
+
+Color Squares Information
+    lightest to darkest (most brightness to least brightness)
+
+
+Bottom left text    location = (83, 1858)   dimensions (722, 73)    size = 21
+    LABEL: <label>
+    ALBUM LENGTH: <album length>, separated by periods
+
+Bottom right text   NWlocation = (972, 1858)  dimensions (278, 73)    size = 21
+                    NElocation = (1250,1858)
+    RELEASED ON
+    <release date>
+
+https://scannables.scdn.co/uri/plain/png/FFFFFF/black/640/spotify:playlist:4wuGkZLDCgKVttJtfLmVmg
