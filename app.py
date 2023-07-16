@@ -5,6 +5,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_mobility import Mobility
 from creator import handleURL
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
 
 db = SQLAlchemy()
 
@@ -114,10 +115,16 @@ def signupPost():
     result = engine.exec_driver_sql("""SELECT id FROM user;""")
     ids = []
     for row in result:
+        print(row)
         ids.append(row[0])
     print(ids)
     ids = list(int(id) for id in ids)
-    max_id = max(ids)
+    if len(ids) == 0:
+        max_id = 0
+    else:
+        max_id = max(ids)
+
+    os.makedirs(os.path.join(os.getcwd(), "static\\PosterStorage\\user"+str(max_id+1)))
 
     # create a new user with the form data. Hash the password so the plaintext version isn't saved.
     new_user = User(email=email, albumStorageLocation = "static\\PosterStorage\\user"+str(max_id+1), password=generate_password_hash(password, method='scrypt'))

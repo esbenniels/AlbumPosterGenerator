@@ -6,7 +6,7 @@
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <meta http-equiv="X-UA-Compatible" content="IE=edge">
  
-     <title>FORCE Technology Data Portal</title>
+     <title>FORCE Technology QR-Code Portal</title>
  
      <!-- Bootstrap CSS CDN -->
      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
@@ -16,7 +16,6 @@
  
      <!-- Our Custom CSS -->
      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='home.css') }}">
-
      <!-- Scrollbar Custom CSS -->
      <link rel="stylesheet"
          href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
@@ -28,19 +27,13 @@
      <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js"
          integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
          crossorigin="anonymous"></script>
-    <!-- <script
-         src="indexNoFirebase.js"
-         type="module"
-    ></script> -->
-    <script src="{{ url_for('static', filename='index.js')}}"></script>
  
  </head>
  
  <body>
      <div class="wrapper">
-
-        {% if not request.MOBILE %}
-        <nav id="sidebar">
+         <!-- Sidebar  -->
+         <nav id="sidebar">
             <div class="sidebar-header">
                 <h3>Spotify Album/Playlist Poster Generator</h3>
             </div>
@@ -77,32 +70,47 @@
            </div>
 
         </nav>
-        {% endif %}
-
-        
-
-        <div class="text-center" id="content">
+         <div id="content" class = "text-center">
             <div class="text-center">
-                <h2>Spotify Album/Playlist Poster Generator</h2>
+                <h1>FORCE Technology Portal Sign Up</h1>
             </div>
             <br>
-            <form action="{{ url_for('urlSubmit') }}" method="post" enctype="multipart/form-data">
-                <div class="row">
-                    <div class="col-md-6">
-                        <label for="url">Spotify Album/Playlist URL</label>
+            <div class="text-center">
+                {% with messages = get_flashed_messages() %}
+             {% if messages %}
+                 {% if messages[0].__contains__('GREEN') %}
+                     <div style="color: green;">
+                         {{ messages[0].replace("GREEN", "") }}
+                     </div>
+                 {% elif messages[0].__contains__('RED') %}
+                     <div style="color: red;">
+                         {{ messages[0].replace("RED", "") }}
+                     </div>
+                 {% endif %}
+             {% endif %}
+             {% endwith %}
+               <br>
+               <form method="POST" action="{{url_for('signupPost')}}" enctype="multipart/form-data">
+                    <div class="row">
+                       <div class="col-md-6 text-left">
+                           <label class = "form-label" for="Email">Email</label>
+                           <input type="email" class="form-control" id="Email" name="email" required>
+                       </div>
+                       <div class="col-md-6 text-left">
+                           <label for="Password" class="form-label">Password</label>
+                           <input type="password" class="form-control" id = "Password" name="password" required>
+                       </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <input type="text" id="url" name="SpotifyUrl" class="form-control">
+                    <br>
+                    <div class="row">
+                        <div class="col-md-2 text-left">
+                            <button class="btn btn-primary" type="submit">Sign Up</button>
+                        </div>
                     </div>
-                    <div class="col-md-6 text-left">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </div>
-                </div>
-            </form>
+               </form>
+            </div>
         </div>
-
+          
      </div>
  
      
@@ -122,7 +130,24 @@
      <!-- jQuery Custom Scroller CDN -->
      <script
          src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
-
+ 
+ 
+     <script type="text/javascript">
+         $(document).ready(function () {
+             $("#sidebar").mCustomScrollbar({
+                 theme: "minimal"
+             });
+ 
+             $('#sidebarCollapse').on('click', function () {
+                 $('#sidebar, #content').toggleClass('active');
+                 $('.collapse.in').toggleClass('in');
+                 $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+             });
+         });
+     </script>
+     <!-- <script type = "module" src="qrcodeNoFirebase.js"></script> -->
+ 
+ 
  </body>
  
  </html>
