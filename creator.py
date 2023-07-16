@@ -89,7 +89,6 @@ def getAlbumDetails(url: str) -> dict:
     
     # https://open.spotify.com/album/5MS3MvWHJ3lOZPLiMxzOU6?si=6GDOWf7nSnaqsDa-BbIH5Q
 
-
 def getTopColors() -> list[list[int]]:
     
     NUM_CLUSTERS = defaultParams['numSquares']
@@ -142,7 +141,7 @@ def getAlbumLength(trackStruct: list[dict]) -> str:
     hr = delta.seconds // 3600
     return f"{hr:02d}.{min:02d}.{sec:02d}"
 
-def writeCorners(draw: ImageDraw, details: dict):
+def writeText(draw: ImageDraw, details: dict):
     boldText = ImageFont.truetype('SourceSans3-ExtraBold.ttf', defaultParams['cornerTextSize'])
     artistFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['artistSize'])
     titleFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['titleSize'])
@@ -163,7 +162,7 @@ def writeCorners(draw: ImageDraw, details: dict):
         draw.text((1250, 1370), f"{details['artists'].upper()[:defaultParams['maxArtistsLength']] + '...'}", (0,0,0), font=artistFont, anchor='rt')
 
     if len(details['name']) <= 10:
-        draw.text((1250, 1427), f"{details['name'].upper()}", (0,0,0), font=titleFont, anchor='rt')
+        draw.text((1250, 1435), f"{details['name'].upper()}", (0,0,0), font=titleFont, anchor='rt')
     else:
         name = details['name'].upper()
         words : list = name.split(' ')
@@ -189,7 +188,7 @@ def writeCorners(draw: ImageDraw, details: dict):
         # print(parts)
 
         for j in range(len(parts)):
-            draw.text((1250, 1427 + (j*82)), f"{parts[j]}", (0,0,0), font=titleFont, anchor='rt')
+            draw.text((1250, 1435 + (j*82)), f"{parts[j]}", (0,0,0), font=titleFont, anchor='rt')
 
 def writeTracks(draw: ImageDraw, details: dict):
     trackFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['trackSize'])
@@ -227,7 +226,8 @@ def writeTracks(draw: ImageDraw, details: dict):
                 else:
                     parts.append(build)
                     build = ""
-        parts.append(build)
+        if build != "":
+            parts.append(build)
 
         # column check
         if nextY+(len(parts)*defaultParams['trackLineSpace']) > 1798:
@@ -276,7 +276,7 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
 
     # Handling Label & Album Length
     draw = ImageDraw.Draw(canvas)
-    writeCorners(draw, details)
+    writeText(draw, details)
 
     # Handling tracks
     writeTracks(draw, details)
