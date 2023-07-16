@@ -3,11 +3,12 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from flask_mobility import Mobility
-from creator import handleURL
+from creator import handleURL, defaultParams
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
 db = SQLAlchemy()
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -26,7 +27,7 @@ def create_app():
     db.init_app(app)
 
     login_manager = LoginManager()
-    login_manager.login_view = 'auth.login'
+    login_manager.login_view = 'login'
     login_manager.init_app(app)
 
 
@@ -53,21 +54,39 @@ app = create_app()
 
 
 @app.route("/index", methods=['POST', 'GET'])
-# @login_required
+@login_required
 def index():
     return render_template("index.html", current_user = current_user)
 
 @app.route("/urlSubmit", methods=['POST', 'GET'])
-# @login_required
+@login_required
 def urlSubmit():
     if request.method == 'GET':
         return redirect(url_for('index'))
     else:
-        url = request.args.get('SpotifyUrl')
-        filename = handleURL(url)
+        url = request.form.get('SpotifyUrl')
+        fields = ["numSquares", "coverDim", "codeDim", "cornerTextSize", "artistSize", 
+                  "titleSize", "trackSize", "maxLabelLength", "maxArtistsLength", 
+                  "maxTitleLength", "maxTrackLineWidth", "trackLineSpace"]
+        newParams = {}
+        for field in fields:
+            if not request.form.get(field, None) or request.form.get(field, None) == defaultParams[field]:
+                newParams[field] = int(defaultParams[field])
+            else:
+                newParams[field] = int(request.form.get(field))
+
+        print("Passing Parameters: ", newParams)
+
+        handleURL(url, newParams, "/user"+str(current_user.id))
+        
+
+
         # server file to front end
+
+
         flash("Album poster successfully generated")
-        return render_template("index.html", current_user, current_user)
+        return render_template("index.html", current_user = current_user, 
+                               posterPath = "PosterStorage/user"+str(current_user.id)+"/poster.png")
 
 @app.route('/login')
 def login():

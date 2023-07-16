@@ -1,5 +1,4 @@
-https://www.canva.com/design/DAFoObbQJt4/9ONImJSmXjfCDpIhAPoOFw/edit
-
+https://www.canva.com/design/DAFoObbQJt4/9ONImJSmXjfCDpIhAPoOFw/edit?utm_content=DAFoObbQJt4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 album cover: 
     spotify provides 640x640 image
     use opencv to upscale to 1280x1280
@@ -19,5 +18,7 @@ Bottom right text   NWlocation = (972, 1858)  dimensions (278, 73)    size = 21
                     NElocation = (1250,1858)
     RELEASED ON
     <release date>
+
+artist              NElocation = (1250, 1361)   
 
 https://scannables.scdn.co/uri/plain/png/FFFFFF/black/640/spotify:playlist:4wuGkZLDCgKVttJtfLmVmg
