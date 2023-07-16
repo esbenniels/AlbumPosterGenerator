@@ -56,7 +56,7 @@ app = create_app()
 @app.route("/index", methods=['POST', 'GET'])
 @login_required
 def index():
-    return render_template("index.html", current_user = current_user)
+    return render_template("index.html", current_user = current_user, defaultParams=defaultParams)
 
 @app.route("/urlSubmit", methods=['POST', 'GET'])
 @login_required

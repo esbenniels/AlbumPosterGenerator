@@ -27,7 +27,7 @@ defaultParams = {
     "artistSize" : 57,
     "titleSize" : 79,
     "trackSize" : 26,
-    "maxLabelLength" : 30,
+    "maxLabelLength" : 40,
     "maxArtistsLength" : 15,
     "maxTitleLength" : 11,
     "maxTrackLineWidth" : 15,

@@ -105,22 +105,22 @@
                     <div class="col-md-3">
                         <label for="1">Number of Color Squares</label>
                         <input type="number" id="1" name="numSquares" class="form-control"
-                            value=5>
+                            value="{{ defaultParams['numSquares'] }}">
                     </div>
                     <div class="col-md-3">
                         <label for="2">Album Cover Dimension</label>
                         <input type="number" id="2" name="coverDim" class="form-control"
-                            value=1166>
+                            value="{{ defaultParams['coverDim'] }}">
                     </div>
                     <div class="col-md-3">
                         <label for="3">Spotify Code Dimension</label>
                         <input type="number" id="3" name="codeDim" class="form-control"
-                        value=444>
+                        value="{{ defaultParams['codeDim'] }}">
                     </div>
                     <div class="col-md-3">
                         <label for="4">Corner Text Size</label>
                         <input type="number" id="4" name="cornerTextSize" class="form-control"
-                            value=30>
+                            value="{{ defaultParams['cornerTextSize'] }}">
                     </div>
                 </div>
                 <br>
@@ -128,22 +128,22 @@
                     <div class="col-md-3">
                         <label for="5">Artist Text Size</label>
                         <input type="number" id="5" name="artistTextSize" class="form-control"
-                            value=57>
+                            value="{{ defaultParams['artistSize'] }}">
                     </div>
                     <div class="col-md-3">
                         <label for="6">Title Text Size</label>
                         <input type="number" id="6" name="titleTextSize" class="form-control"
-                            value=79>
+                            value="{{ defaultParams['titleSize'] }}">
                     </div>
                     <div class="col-md-3">
                         <label for="7">Track Text Size</label>
                         <input type="number" id="7" name="trackTextSize" class="form-control"
-                            value=26>
+                            value="{{ defaultParams['trackSize'] }}">
                     </div>
                     <div class="col-md-3">
                         <label for="8">Producer Labels Max Linewidth</label>
                         <input type="number" id="8" name="maxLabelLength" class="form-control"
-                            value=30>
+                            value="{{ defaultParams['maxLabelLength'] }}">
                     </div>
                 </div>
                 <br>
@@ -151,22 +151,22 @@
                     <div class="col-md-3">
                         <label for="9">Artists Text Max Linewidth</label>
                         <input type="number" id="9" name="maxArtistsLength" class="form-control"
-                            value=15>
+                            value="{{ defaultParams['maxArtistsLength'] }}">
                     </div>
                     <div class="col-md-3">
                         <label for="10">Title Text Max Linewidth</label>
-                        <input type="number" id="10" name="artistTextSize" class="form-control"
-                            value=11>
+                        <input type="number" id="10" name="maxTitleLength" class="form-control"
+                            value="{{ defaultParams['maxTitleLength'] }}">
                     </div>
                     <div class="col-md-3">
                         <label for="11">Track Text Max Linewidth</label>
                         <input type="number" id="11" name="maxTrackLineWidth" class="form-control"
-                            value=15>
+                            value="{{ defaultParams['maxTrackLineWidth'] }}">
                     </div>
                     <div class="col-md-3">
                         <label for="12">Track Text Line Spacing</label>
                         <input type="number" id="12" name="trackLineSpace" class="form-control"
-                            value=33>
+                            value="{{ defaultParams['trackLineSpace'] }}">
                     </div>
                 </div>
                 <br>
