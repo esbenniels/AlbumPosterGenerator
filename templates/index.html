@@ -6,7 +6,7 @@
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <meta http-equiv="X-UA-Compatible" content="IE=edge">
  
-     <title>FORCE Technology Data Portal</title>
+     <title>Spotify Album Poster Generator</title>
  
      <!-- Bootstrap CSS CDN -->
      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
@@ -90,80 +90,70 @@
             class="text-left">
                 <div class="row">
                     <div class="col-md-6">
-                        <label for="url"><h5>Spotify Album/Playlist URL</h5></label>
+                        <label for="url"><h4>Spotify Album/Playlist URL</h4></label>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <input type="text" id="url" name="SpotifyUrl" class="form-control">
+                        {% if lastAlbum %}
+                            <input type="text" id="url" name="SpotifyUrl" class="form-control"
+                                value="{{ lastAlbum }}">
+                        {% else %}
+                            <input type="text" id="url" name="SpotifyUrl" class="form-control">
+                        {% endif %}
                     </div>
                 </div>
                 <br>
-                <h5>Poster Options</h5>
-                <br>
                 <div class="row">
                     <div class="col-md-3">
-                        <label for="1">Number of Color Squares</label>
-                        <input type="number" id="1" name="numSquares" class="form-control"
-                            value="{{ defaultParams['numSquares'] }}">
-                    </div>
-                    <div class="col-md-3">
+                        <h5>Images Options</h5>
                         <label for="2">Album Cover Dimension</label>
                         <input type="number" id="2" name="coverDim" class="form-control"
                             value="{{ defaultParams['coverDim'] }}">
-                    </div>
-                    <div class="col-md-3">
+                        <br>
                         <label for="3">Spotify Code Dimension</label>
                         <input type="number" id="3" name="codeDim" class="form-control"
-                        value="{{ defaultParams['codeDim'] }}">
+                            value="{{ defaultParams['codeDim'] }}">
+                        <br>
                     </div>
                     <div class="col-md-3">
+                        <h5>Text Sizes</h5>
+                        <label for="5">Artist Text Size</label>
+                        <input type="number" id="5" name="artistSize" class="form-control"
+                            value="{{ defaultParams['artistSize'] }}">
+                        <br>
+                        <label for="6">Title Text Size</label>
+                        <input type="number" id="6" name="titleSize" class="form-control"
+                            value="{{ defaultParams['titleSize'] }}">
+                        <br>
                         <label for="4">Corner Text Size</label>
                         <input type="number" id="4" name="cornerTextSize" class="form-control"
                             value="{{ defaultParams['cornerTextSize'] }}">
                     </div>
-                </div>
-                <br>
-                <div class="row">
                     <div class="col-md-3">
-                        <label for="5">Artist Text Size</label>
-                        <input type="number" id="5" name="artistSize" class="form-control"
-                            value="{{ defaultParams['artistSize'] }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="6">Title Text Size</label>
-                        <input type="number" id="6" name="titleSize" class="form-control"
-                            value="{{ defaultParams['titleSize'] }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="7">Track Text Size</label>
-                        <input type="number" id="7" name="trackSize" class="form-control"
-                            value="{{ defaultParams['trackSize'] }}">
-                    </div>
-                    <div class="col-md-3">
+                        <h5>Artist, Title, Labels Properties</h5>
+                        <label for="9">Artists Text Max Linewidth</label>
+                        <input type="number" id="9" name="maxArtistsLength" class="form-control"
+                            value="{{ defaultParams['maxArtistsLength'] }}">
+                        <br>
+                        <label for="10">Title Text Max Linewidth</label>
+                        <input type="number" id="10" name="maxTitleLength" class="form-control"
+                            value="{{ defaultParams['maxTitleLength'] }}">
+                        <br>
                         <label for="8">Producer Labels Max Linewidth</label>
                         <input type="number" id="8" name="maxLabelLength" class="form-control"
                             value="{{ defaultParams['maxLabelLength'] }}">
                     </div>
-                </div>
-                <br>
-                <div class="row">
                     <div class="col-md-3">
-                        <label for="9">Artists Text Max Linewidth</label>
-                        <input type="number" id="9" name="maxArtistsLength" class="form-control"
-                            value="{{ defaultParams['maxArtistsLength'] }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="10">Title Text Max Linewidth</label>
-                        <input type="number" id="10" name="maxTitleLength" class="form-control"
-                            value="{{ defaultParams['maxTitleLength'] }}">
-                    </div>
-                    <div class="col-md-3">
+                        <h5>Track Text Properties</h5>
+                        <label for="7">Track Text Size</label>
+                        <input type="number" id="7" name="trackSize" class="form-control"
+                            value="{{ defaultParams['trackSize'] }}">
+                        <br>
                         <label for="11">Track Text Max Linewidth</label>
                         <input type="number" id="11" name="maxTrackLineWidth" class="form-control"
                             value="{{ defaultParams['maxTrackLineWidth'] }}">
-                    </div>
-                    <div class="col-md-3">
+                        <br>
                         <label for="12">Track Text Line Spacing</label>
                         <input type="number" id="12" name="trackLineSpace" class="form-control"
                             value="{{ defaultParams['trackLineSpace'] }}">
@@ -171,7 +161,8 @@
                 </div>
                 <br>
                 <div class="row">
-                    <div class="col-md-6 text-left">
+                    <div class="col-md-6"></div>
+                    <div class="col-md-6 text-right">
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </div>
                 </div>
@@ -181,7 +172,7 @@
             <br>
             {% if posterPath %}
                 <div class="text-center">
-                    <a href="{{ url_for('static', filename = posterPath) }}" class="btn btn-primary" target="_blank">Download Poster</a>
+                    <img src="{{ url_for('static', filename = posterPath) }}">
                 </div>
             {% endif %}
         </div>

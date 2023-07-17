@@ -5,7 +5,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_mobility import Mobility
 from creator import handleURL, defaultParams
 from werkzeug.security import generate_password_hash, check_password_hash
-import os
+import os, re
 
 db = SQLAlchemy()
 
@@ -15,6 +15,25 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
     albumStorageLocation = db.Column(db.String(100), unique=True)
+
+class Album(db.Model):
+    id = db.Column(db.String(100), primary_key=True)
+    r1 = db.Column(db.Integer)
+    r2 = db.Column(db.Integer)
+    r3 = db.Column(db.Integer)
+    r4 = db.Column(db.Integer)
+    r5 = db.Column(db.Integer)
+    g1 = db.Column(db.Integer)
+    g2 = db.Column(db.Integer)
+    g3 = db.Column(db.Integer)
+    g4 = db.Column(db.Integer)
+    g5 = db.Column(db.Integer)
+    b1 = db.Column(db.Integer)
+    b2 = db.Column(db.Integer)
+    b3 = db.Column(db.Integer)
+    b4 = db.Column(db.Integer)
+    b5 = db.Column(db.Integer)
+
 
 def create_app():
     app = Flask(__name__)
@@ -65,7 +84,7 @@ def urlSubmit():
         return redirect(url_for('index'))
     else:
         url = request.form.get('SpotifyUrl')
-        fields = ["numSquares", "coverDim", "codeDim", "cornerTextSize", "artistSize", 
+        fields = ["coverDim", "codeDim", "cornerTextSize", "artistSize", 
                   "titleSize", "trackSize", "maxLabelLength", "maxArtistsLength", 
                   "maxTitleLength", "maxTrackLineWidth", "trackLineSpace"]
         newParams = {}
@@ -77,15 +96,29 @@ def urlSubmit():
 
         print("Passing Parameters: ", newParams)
 
-        handleURL(url, newParams, "/user"+str(current_user.id))
-        
-        # server file to front end
+        a = Album.query.filter_by(id = re.findall('album/(.*)\?', url)[0]).first()
+        if a:
+            colors = [[a.r1, a.g1, a.b1],[a.r2, a.g2, a.b2],[a.r3, a.g3, a.b3],[a.r4, a.g4, a.b4],[a.r5, a.g5, a.b5]]
+            handleURL(url, newParams, "/user"+str(current_user.id), colors)
+        else:
+            colors = handleURL(url, newParams, "/user"+str(current_user.id))
+            print("Colors received in app.py: ", colors)
+            for i in range(len(colors), 5):
+                colors.insert(i, [255,255,255])
 
+            print("New Album detected: ", colors)
+            newAlbum = Album(id = re.findall('album/(.*)\?', url)[0], r1 = colors[0][0], 
+                r2=colors[1][0], r3=colors[2][0], r4=colors[3][0], r5=colors[4][0],
+                g1=colors[0][1], g2=colors[1][1], g3=colors[2][1], g4=colors[3][1], g5=colors[4][1],
+                b1=colors[0][2], b2=colors[1][2], b3=colors[2][2], b4=colors[3][2], b5=colors[4][2])
+            db.session.add(newAlbum)
+            db.session.commit()
 
         flash("Album poster successfully generated")
         return render_template("index.html", current_user = current_user, 
                                posterPath = "PosterStorage/user"+str(current_user.id)+"/poster.png",
-                               defaultParams = defaultParams)
+                               defaultParams = defaultParams,
+                               lastAlbum = url)
 
 @app.route('/login')
 def login():
@@ -142,7 +175,10 @@ def signupPost():
     else:
         max_id = max(ids)
 
-    os.makedirs(os.path.join(os.getcwd(), "static\\PosterStorage\\user"+str(max_id+1)))
+    try:
+        os.makedirs(os.path.join(os.getcwd(), "static\\PosterStorage\\user"+str(max_id+1)))
+    except:
+        pass
 
     # create a new user with the form data. Hash the password so the plaintext version isn't saved.
     new_user = User(email=email, albumStorageLocation = "static\\PosterStorage\\user"+str(max_id+1), password=generate_password_hash(password, method='scrypt'))

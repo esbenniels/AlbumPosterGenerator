@@ -20,7 +20,6 @@ os.environ['SPOTIPY_CLIENT_SECRET'] = '0f26f4b32912427ca59b7c62d8c36b5a'
 global defaultParams
 
 defaultParams = {
-    "numSquares": 5,
     "coverDim" :1166,
     "codeDim" : 444,
     "cornerTextSize" : 30,
@@ -35,9 +34,9 @@ defaultParams = {
 }
 
 
-def handleURL(url: str, params: dict[str, int] = defaultParams, saveFolder: str = ""):
+def handleURL(url: str, params: dict[str, int] = defaultParams, saveFolder: str = "", colors: list[tuple[int, int, int]] = None):
     if "album" in url:
-        createAlbumPoster(url, params, saveFolder)
+        return createAlbumPoster(url, params, saveFolder, colors)
     else:
         return "Not a Spotify playlist or poster URL"
 
@@ -78,6 +77,7 @@ def getAlbumDetails(url: str) -> dict:
     ]
 
     return {
+        'id': albumID,
         'name': results['name'],
         'releaseDate': goodDate,
         'label': results['label'],
@@ -91,7 +91,7 @@ def getAlbumDetails(url: str) -> dict:
 
 def getTopColors() -> list[list[int]]:
     
-    NUM_CLUSTERS = defaultParams['numSquares']
+    NUM_CLUSTERS = 5
 
     bar = Bar("Finding dominant colors ", max=4)
     im = Image.open("album_cover.jpg")
@@ -108,6 +108,10 @@ def getTopColors() -> list[list[int]]:
         hexes.append("#"+binascii.hexlify(bytearray(int(c) for c in peak)).decode('ascii'))
     bar.next()
     sortedCodes = sorted(codes, key=lambda triple: sum(triple))
+    for i in range(len(sortedCodes)):
+        for j in range(3):
+            sortedCodes[i][j] = int(round(sortedCodes[i][j],0))
+
     print("\n{0:<7}{1:<7}{2:<7}{3:<7}{4:<7}".format("Color", "Red", "Green", "Blue", "Brightness"))
     for i in range(len(sortedCodes)):
         print("{0:<7}{1:<7.2f}{2:<7.2f}{3:<7.2f}{4:<7.2f}".format(i+1, sortedCodes[i][0], sortedCodes[i][1], sortedCodes[i][2], sum(sortedCodes[i])))
@@ -251,7 +255,7 @@ def writeTracks(draw: ImageDraw, details: dict):
         
         i += 1
 
-def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFolder: str = ""):
+def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFolder: str = "", colors: list[list[int]] = None):
     details = getAlbumDetails(url)
 
     global defaultParams
@@ -266,8 +270,20 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
     sCode = getSpotifyCode(url, 'album')
     canvas.paste(sCode, (805,1736))
 
+    returning = None
+
     # handling color squares
-    sortedRGB = getTopColors()
+    if colors:
+        print("Colors passed in from database")
+        sortedRGB = sorted(colors, key=lambda triple: sum(triple))
+        print("\n{0:<7}{1:<7}{2:<7}{3:<7}{4:<7}".format("Color", "Red", "Green", "Blue", "Brightness"))
+        for i in range(len(sortedRGB)):
+            print("{0:<7}{1:<7.2f}{2:<7.2f}{3:<7.2f}{4:<7.2f}".format(i+1, sortedRGB[i][0], sortedRGB[i][1], sortedRGB[i][2], sum(sortedRGB[i])))
+    else:
+        print("No colors passed from database")
+        sortedRGB = getTopColors()
+        returning = sortedRGB
+    
     coords = [(1167,1270), (1056,1270), (944,1270), (833,1270), (722,1270) ]
     for i in range(len(sortedRGB)):
         # make square, place at correct location
@@ -282,8 +298,8 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
     writeTracks(draw, details)
 
     canvas.save(f"static/PosterStorage{saveFolder}/poster.png")
-
-
+    print("Returning from handleURL: ", returning)
+    return returning
 
 
 # spotifyURL = input("Enter album or playlist URL: ")
