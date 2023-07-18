@@ -1,6 +1,6 @@
-
 .cache
 *.pyc
+*.png
+*.jpg
 album_cover.jpg
 spotify_code.png
-static/PosterStorage/user1/poster.png
