@@ -86,8 +86,14 @@
                 <h2>Spotify Album/Playlist Poster Generator</h2>
             </div>
             <br>
+            <script>
+                function enableLoader() {
+                    document.getElementById("loader").style.display = "block";
+                }
+            </script>
+
             <form action="{{ url_for('urlSubmit') }}" method="post" enctype="multipart/form-data"
-            class="text-left">
+                class="text-left" id="genForm" onsubmit="enableLoader()">
                 <div class="row">
                     <div class="col-md-6">
                         <label for="url"><h4>Spotify Album/Playlist URL</h4></label>
@@ -161,9 +167,11 @@
                 </div>
                 <br>
                 <div class="row">
-                    <div class="col-md-6"></div>
-                    <div class="col-md-6 text-right">
+                    <div class="col-md-1 text-left">
                         <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                    <div class="col-md-3 text-left">
+                        <div class="loader" id="loader" style="display: none;"></div>
                     </div>
                 </div>
             </form>
@@ -172,7 +180,7 @@
             <br>
             {% if posterPath %}
                 <div class="text-center">
-                    <img src="{{ url_for('static', filename = posterPath) }}">
+                    <img src="{{ url_for('static', filename = posterPath) }}" style="border: 5px solid black; max-width: 100%;">
                 </div>
             {% endif %}
         </div>

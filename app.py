@@ -117,7 +117,7 @@ def urlSubmit():
         flash("Album poster successfully generated")
         return render_template("index.html", current_user = current_user, 
                                posterPath = "PosterStorage/user"+str(current_user.id)+"/poster.png",
-                               defaultParams = defaultParams,
+                               defaultParams = newParams,
                                lastAlbum = url)
 
 @app.route('/login')
