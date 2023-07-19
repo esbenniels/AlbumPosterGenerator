@@ -39,48 +39,9 @@
  <body>
      <div class="wrapper">
 
-        {% if not request.MOBILE %}
-        <nav id="sidebar">
-            <div class="sidebar-header">
-                <h3>Spotify Album/Playlist Poster Generator</h3>
-            </div>
-
-            <ul class="list-unstyled components">
-                <li>
-                    <a href="{{ url_for('index') }}">Poster Generator</a>
-                </li>
-                {% if not current_user.is_authenticated %}
-                <li>
-                   <a href="{{ url_for('login') }}">Login</a>
-                </li>
-                <li>
-                   <a href="{{ url_for('signup') }}">Signup</a>
-                </li>
-                {% endif %}
-                {% if current_user.is_authenticated %}
-                <li>
-                   <a href="{{ url_for('logout') }}">Logout</a>
-                </li>
-                {% endif %}
-            </ul>
-
-            <div class="footer-on-the-bottom">
-               <footer class='footer fixed-bottom' style='padding-bottom: 10px;'>
-                   <div style="margin-left: 60px; width: 185px;align-content: center;">
-                      {% if not current_user.is_authenticated %} 
-                      <span style="text-align: center;" id="sign-in-state">Signed Out</span>
-                      {% else %}
-                      <span style="text-align: center;" id="sign-in-state">Signed In</span>
-                      {% endif %}
-                   </div>
-               </footer>
-            </div>
-
-        </nav>
-        {% endif %}
+        {% include 'navbar.html' %}
 
         
-
         <div class="text-center" id="content">
             <div class="text-center">
                 <h2>Spotify Album/Playlist Poster Generator</h2>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+ <html>
+ 
+ <head>
+     <meta charset="utf-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+ 
+     <title>Spotify Album Poster Generator</title>
+ 
+     <!-- Bootstrap CSS CDN -->
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
+         integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+ 
+     <!-- Our Custom CSS -->
+     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='home.css') }}">
+
+     <!-- Scrollbar Custom CSS -->
+     <link rel="stylesheet"
+         href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
+     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+     <!-- Font Awesome JS -->
+     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
+         integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ"
+         crossorigin="anonymous"></script>
+     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js"
+         integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
+         crossorigin="anonymous"></script>
+    <!-- <script
+         src="indexNoFirebase.js"
+         type="module"
+    ></script> -->
+    <script src="{{ url_for('static', filename='index.js')}}"></script>
+ 
+ </head>
+ 
+ <body>
+     <div class="wrapper">
+
+        {% include 'navbar.html' %}
+
+
+        <div class="text-center" id="content">
+            <div class="text-center">
+                <h2>Spotify Album/Playlist Poster Generator</h2>
+            </div>
+            <br>
+            <script>
+                function enableLoader() {
+                    document.getElementById("loader").style.display = "block";
+                }
+            </script>
+
+            {% if posterNames %}
+            <!-- <table> -->
+                <!-- <tbody> -->
+                    {% for i in range(numRows) %}
+                    <div class="row">
+                        {% for j in range(numColumns[i]) %}
+                        <div class="col-md-3 text-center">
+                            <h5>{{ albumNames[4*i+j] }}</h5>
+                            <form action="{{ url_for('urlSubmit') }}" method="post" enctype="multipart/form-data">
+                                
+                                <input type="text" id="url" name="SpotifyUrl" class="form-control"
+                                value="{{ 'https://open.spotify.com/album/'+posterNames[4*i+j].replace('.png','')+'?' }}" style="display: none;">
+                                
+                                <!-- https://open.spotify.com/album/3SpBlxme9WbeQdI9kx7KAV?si=9gofoy4FS-6P6K3GtZdiow -->
+
+
+                                <input type="number" id="1" name="coverDim" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['coverDim'] }}" style="display: none;">
+                                <input type="number" id="2" name="codeDim" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['codeDim'] }}" style="display: none;">
+                                <input type="number" id="3" name="cornerTextSize" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['cornerTextSize'] }}" style="display: none;">
+                                <input type="number" id="4" name="artistSize" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['artistSize'] }}" style="display: none;">
+                                <input type="number" id="5" name="titleSize" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['titleSize'] }}" style="display: none;">
+                                <input type="number" id="6" name="trackSize" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['trackSize'] }}" style="display: none;">
+                                <input type="number" id="7" name="maxLabelLength" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['maxLabelLength'] }}" style="display: none;">
+                                <input type="number" id="8" name="maxArtistsLength" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['maxArtistsLength'] }}" style="display: none;">
+                                <input type="number" id="9" name="maxTitleLength" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['maxTitleLength'] }}" style="display: none;">
+                                <input type="number" id="10" name="maxTrackLinewidth" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['maxTrackLineWidth'] }}" style="display: none;">
+                                <input type="number" id="11" name="trackLineSpace" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['trackLineSpace'] }}" style="display: none;">
+                                <input type="number" id="11" name="maxTracks" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['maxTracks'] }}" style="display: none;">
+                                <img style="width: 200px; height: 300px;" 
+                                    src="{{ url_for('static', filename = 'PosterStorage/user'+current_user.id | string() + '/' + posterNames[4*i + j]) }}" alt="">
+                                <br><br>
+                                <button type="submit" class="btn btn-primary">Go to Generator</button>
+                            </form>
+                            <!-- Album name and thumbnail -->
+                            
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <br>
+                    {% endfor %}
+                <!-- </tbody> -->
+            <!-- </table> -->
+
+
+
+            {% endif %}
+            <br>
+        </div>
+
+     </div>
+ 
+     
+ 
+     <!-- jQuery CDN - Slim version (=without AJAX) -->
+     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+         crossorigin="anonymous"></script>
+     <!-- Popper.JS -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"
+         integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
+         crossorigin="anonymous"></script>
+     <!-- Bootstrap JS -->
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"
+         integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
+         crossorigin="anonymous"></script>
+     <!-- jQuery Custom Scroller CDN -->
+     <script
+         src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
+
+ </body>
+ 
+ </html>

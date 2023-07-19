@@ -5,7 +5,14 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_mobility import Mobility
 from creator import handleURL, defaultParams
 from werkzeug.security import generate_password_hash, check_password_hash
-import os, re
+import os, re, json
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+
+os.environ['SPOTIPY_CLIENT_ID'] = '56c47550643e42b9a6ab2aa821fe394c'
+os.environ['SPOTIPY_CLIENT_SECRET'] = '0f26f4b32912427ca59b7c62d8c36b5a'
+
+spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
 db = SQLAlchemy()
 
@@ -84,6 +91,18 @@ def urlSubmit():
         return redirect(url_for('index'))
     else:
         url = request.form.get('SpotifyUrl')
+
+        albumID = re.findall('album/(.*)\?', url)[0]
+        if len(albumID) != 22:
+            flash("Invalid Spotify album URL. Try copying the link from Spotify's share options.")
+            return render_template("index.html", current_user=current_user, defaultParams = defaultParams)
+
+        try:
+            results = spotify.album(albumID)
+        except:
+            flash("REDError retrieving Spotify Album. Check URL")
+            return render_template("index.html", current_user=current_user, defaultParams = defaultParams)
+        
         newParams = {}
         for field in defaultParams:
             if not request.form.get(field, None) or request.form.get(field, None) == defaultParams[field]:
@@ -113,9 +132,49 @@ def urlSubmit():
 
         flash("Album poster successfully generated")
         return render_template("index.html", current_user = current_user, 
-                               posterPath = "PosterStorage/user"+str(current_user.id)+"/poster.png",
+                               posterPath = "PosterStorage/user"+str(current_user.id)+f"/{albumID}.png",
                                defaultParams = newParams,
                                lastAlbum = url)
+
+@app.route("/posterHistory", methods=['POST', 'GET'])
+@login_required
+def posterHistory():
+
+    posterNames = os.listdir(f"static\\PosterStorage\\user{str(current_user.id)}")
+    posterNames = [file for file in posterNames if file.__contains__('.png')]
+
+    paramDict = {}
+    with open(f"static/PosterStorage/user{str(current_user.id)}/data.json", 'r+') as handle:
+        data = json.load(handle)
+        for poster in posterNames:
+            paramDict[poster] = data[poster.replace('.png','')]
+        handle.close()
+
+    numRows = (len(posterNames)//4)+1
+
+    print("Posters: ", posterNames)
+    print("Number of posters to show: ", len(posterNames))
+    print("Number of rows: ", numRows)
+    numColumns : list[int] = []
+    tracker = len(posterNames)
+    for i in range(numRows):
+        if i == numRows - 1:
+            numColumns.append(tracker)
+            tracker = 0
+        else:
+            numColumns.append(4)
+            tracker -= 4
+    print("Number of columns: ", numColumns)
+
+    albumNames = list(spotify.album(albumID.replace(".png",""))['name'] for albumID in posterNames)
+    print(albumNames)
+    return render_template("posters.html",
+                           posterNames = posterNames,
+                           paramDict = paramDict,
+                           numRows = numRows,
+                           numColumns = numColumns,
+                           current_user = current_user,
+                           albumNames = albumNames)
 
 @app.route('/login')
 def login():
@@ -177,6 +236,10 @@ def signupPost():
     except:
         pass
 
+    with open(os.path.join(os.getcwd(), "static\\PosterStorage\\user"+str(max_id+1))+"\\data.json", 'w+') as newFileHandle:
+        json.dump({"id": max_id+1}, newFileHandle)
+        newFileHandle.close()
+
     # create a new user with the form data. Hash the password so the plaintext version isn't saved.
     new_user = User(email=email, albumStorageLocation = "static\\PosterStorage\\user"+str(max_id+1), password=generate_password_hash(password, method='scrypt'))
 
@@ -195,4 +258,5 @@ def logout():
     return redirect(url_for('login'))
 
 
-app.run(debug=True, host = '0.0.0.0')
+app.run(host = '0.0.0.0')
+

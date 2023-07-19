@@ -1,7 +1,6 @@
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-import os
-import re
+import os, re, json
 import matplotlib.image as img
 from datetime import datetime, timedelta
 import cv2
@@ -78,7 +77,7 @@ def getAlbumDetails(url: str) -> dict:
     ]
 
     return {
-        'id': albumID,
+        'id': albumID[0],
         'name': results['name'],
         'releaseDate': goodDate,
         'label': results['label'],
@@ -333,11 +332,14 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
     # Handling tracks
     writeTracks(draw, details)
 
-    canvas.save(f"static/PosterStorage{saveFolder}/poster.png")
+    canvas.save(f"static/PosterStorage{saveFolder}/{details['id']}.png")
     # print("Returning from handleURL: ", returning)
+
+    with open(f"static/PosterStorage{saveFolder}/data.json", 'r+') as handle:
+        data: dict = json.load(handle)
+        data[details['id']] = params
+        handle.close()
+    with open(f"static/PosterStorage{saveFolder}/data.json", 'w+') as handle:
+        json.dump(data, handle)
+        handle.close()
     return returning
-
-
-# spotifyURL = input("Enter album or playlist URL: ")
-# handleURL(spotifyURL)
-# getAlbumDetails(spotifyURL)

@@ -1,0 +1,30 @@
+{
+    "6hIBFEFTlljAeGdU1AAGl3": {
+        "coverDim": 1166,
+        "codeDim": 444,
+        "cornerTextSize": 30,
+        "artistSize": 57,
+        "titleSize": 79,
+        "trackSize": 26,
+        "maxLabelLength": 40,
+        "maxArtistsLength": 15,
+        "maxTitleLength": 11,
+        "maxTrackLineWidth": 15,
+        "trackLineSpace": 33,
+        "maxTracks": 30
+    },
+    "1NnDilXBFyACjOuXOvY7Z7": {
+        "coverDim": 1166,
+        "codeDim": 444,
+        "cornerTextSize": 30,
+        "artistSize": 57,
+        "titleSize": 79,
+        "trackSize": 26,
+        "maxLabelLength": 40,
+        "maxArtistsLength": 15,
+        "maxTitleLength": 11,
+        "maxTrackLineWidth": 20,
+        "trackLineSpace": 33,
+        "maxTracks": 30
+    }
+}
