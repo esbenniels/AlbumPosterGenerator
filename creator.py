@@ -30,7 +30,8 @@ defaultParams = {
     "maxArtistsLength" : 15,
     "maxTitleLength" : 11,
     "maxTrackLineWidth" : 15,
-    "trackLineSpace" : 33
+    "trackLineSpace" : 33,
+    "maxTracks": 30
 }
 
 
@@ -46,16 +47,16 @@ def getAlbumDetails(url: str) -> dict:
     spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
     results = spotify.album(albumID[0])
-    print(results['name'])
+    # print(results['name'])
     release = datetime.strptime(results['release_date'], "%Y-%m-%d")
-    print(results['release_date'])
-    print(release.strftime("%d-%m-%Y"))
+    # print(results['release_date'])
+    # print(release.strftime("%d-%m-%Y"))
     newDay = release.strftime("%d")
     if newDay[0] == "0":
         newDay = newDay[1]
     goodDate = release.strftime("%B")+" "+newDay+", "+release.strftime("%Y")
-    print(goodDate)
-    print(results['label'])
+    # print(goodDate)
+    # print(results['label'])
     # print("Artists: ", end="")
     build : str = ''
     for i in range(len(results['artists'])):
@@ -63,8 +64,8 @@ def getAlbumDetails(url: str) -> dict:
         build += results['artists'][i]['name']
         if not i == len(results['artists'])-1:
             build += ", "
-    print("Artists:", build)
-    print("Cover Art:", results['images'][0]['url'])
+    # print("Artists:", build)
+    # print("Cover Art:", results['images'][0]['url'])
 
     trackStruct: list[dict] = [
         {
@@ -93,28 +94,61 @@ def getTopColors() -> list[list[int]]:
     
     NUM_CLUSTERS = 5
 
-    bar = Bar("Finding dominant colors ", max=4)
+    # bar = Bar("Finding dominant colors ", max=4)
     im = Image.open("album_cover.jpg")
-    bar.next()
+    # bar.next()
     ar = np.asarray(im)
     shape = ar.shape
     ar = ar.reshape(np.prod(shape[:2]), shape[2]).astype(float)
-    bar.next()
+    # bar.next()
     codes, dist = scipy.cluster.vq.kmeans(ar, NUM_CLUSTERS)
-    bar.next()
+    # bar.next()
     hexes: list[str] = []
     for i in range(len(codes)):
         peak = codes[i]
         hexes.append("#"+binascii.hexlify(bytearray(int(c) for c in peak)).decode('ascii'))
-    bar.next()
+    # bar.next()
     sortedCodes = sorted(codes, key=lambda triple: sum(triple))
     for i in range(len(sortedCodes)):
         for j in range(3):
             sortedCodes[i][j] = int(round(sortedCodes[i][j],0))
 
-    print("\n{0:<7}{1:<7}{2:<7}{3:<7}{4:<7}".format("Color", "Red", "Green", "Blue", "Brightness"))
+    # print("\n{0:<7}{1:<7}{2:<7}{3:<7}{4:<7}".format("Color", "Red", "Green", "Blue", "Brightness"))
+    # for i in range(len(sortedCodes)):
+        # print("{0:<7}{1:<7.2f}{2:<7.2f}{3:<7.2f}{4:<7.2f}".format(i+1, sortedCodes[i][0], sortedCodes[i][1], sortedCodes[i][2], sum(sortedCodes[i])))
+    return list(sortedCodes)
+
+def getTopColorsAlone(url: str) -> list[list[int]]:
+    NUM_CLUSTERS = 5
+
+    # bar = Bar("Finding dominant colors ", max=4)
+    albumID = re.findall('album/(.*)\?', url)
+    spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+
+    results = spotify.album(albumID[0])
+    coverURL = results['images'][0]['url']
+    urllib.request.urlretrieve(coverURL, "album_cover.jpg")
+    im = Image.open("album_cover.jpg")
+    # bar.next()
+    ar = np.asarray(im)
+    shape = ar.shape
+    ar = ar.reshape(np.prod(shape[:2]), shape[2]).astype(float)
+    # bar.next()
+    codes, dist = scipy.cluster.vq.kmeans(ar, NUM_CLUSTERS)
+    # bar.next()
+    hexes: list[str] = []
+    for i in range(len(codes)):
+        peak = codes[i]
+        hexes.append("#"+binascii.hexlify(bytearray(int(c) for c in peak)).decode('ascii'))
+    # bar.next()
+    sortedCodes = sorted(codes, key=lambda triple: sum(triple))
     for i in range(len(sortedCodes)):
-        print("{0:<7}{1:<7.2f}{2:<7.2f}{3:<7.2f}{4:<7.2f}".format(i+1, sortedCodes[i][0], sortedCodes[i][1], sortedCodes[i][2], sum(sortedCodes[i])))
+        for j in range(3):
+            sortedCodes[i][j] = int(round(sortedCodes[i][j],0))
+
+    # print("\n{0:<7}{1:<7}{2:<7}{3:<7}{4:<7}".format("Color", "Red", "Green", "Blue", "Brightness"))
+    # for i in range(len(sortedCodes)):
+        # print("{0:<7}{1:<7.2f}{2:<7.2f}{3:<7.2f}{4:<7.2f}".format(i+1, sortedCodes[i][0], sortedCodes[i][1], sortedCodes[i][2], sum(sortedCodes[i])))
     return list(sortedCodes)
 
 def getAlbumCover(url: str) -> Image:
@@ -128,7 +162,7 @@ def getAlbumCover(url: str) -> Image:
 def getSpotifyCode(url: str, sType: str = 'album') -> Image:
     albumID = re.findall(f'{sType}/(.*)\?', url)
     targetURL = 'https://scannables.scdn.co/uri/plain/png/FFFFFF/black/640/spotify:{}:{}'.format(sType ,albumID[0])
-    print("Spotify Code URL: ", targetURL) 
+    # print("Spotify Code URL: ", targetURL) 
     urllib.request.urlretrieve(targetURL, 'spotify_code.png')
     code = cv2.imread('spotify_code.png')
     code = cv2.resize(code, (defaultParams['codeDim'],int(defaultParams['codeDim']/4)), interpolation=cv2.INTER_LANCZOS4)
@@ -138,7 +172,7 @@ def getSpotifyCode(url: str, sType: str = 'album') -> Image:
 
 def getAlbumLength(trackStruct: list[dict]) -> str:
     totalMS = sum(song['duration'] for song in trackStruct)
-    print("Total Album MS: ", totalMS)
+    # print("Total Album MS: ", totalMS)
     delta = timedelta(milliseconds=totalMS)
     min = ((delta.seconds // 60)-60) if (delta.seconds // 60) >= 60 else (delta.seconds // 60)
     sec = delta.seconds % 60
@@ -205,6 +239,8 @@ def writeTracks(draw: ImageDraw, details: dict):
     TRACKX2 = 442
     column = 1
     for track in trackList:
+        if i > defaultParams['maxTracks']:
+            break
         try:
             pIndex = track.index("(")
             track = track[:pIndex]
@@ -274,13 +310,13 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
 
     # handling color squares
     if colors:
-        print("Colors passed in from database")
+        # print("Colors passed in from database")
         sortedRGB = sorted(colors, key=lambda triple: sum(triple))
-        print("\n{0:<7}{1:<7}{2:<7}{3:<7}{4:<7}".format("Color", "Red", "Green", "Blue", "Brightness"))
-        for i in range(len(sortedRGB)):
-            print("{0:<7}{1:<7.2f}{2:<7.2f}{3:<7.2f}{4:<7.2f}".format(i+1, sortedRGB[i][0], sortedRGB[i][1], sortedRGB[i][2], sum(sortedRGB[i])))
+        # print("\n{0:<7}{1:<7}{2:<7}{3:<7}{4:<7}".format("Color", "Red", "Green", "Blue", "Brightness"))
+        # for i in range(len(sortedRGB)):
+            # print("{0:<7}{1:<7.2f}{2:<7.2f}{3:<7.2f}{4:<7.2f}".format(i+1, sortedRGB[i][0], sortedRGB[i][1], sortedRGB[i][2], sum(sortedRGB[i])))
     else:
-        print("No colors passed from database")
+        # print("No colors passed from database")
         sortedRGB = getTopColors()
         returning = sortedRGB
     
@@ -298,7 +334,7 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
     writeTracks(draw, details)
 
     canvas.save(f"static/PosterStorage{saveFolder}/poster.png")
-    print("Returning from handleURL: ", returning)
+    # print("Returning from handleURL: ", returning)
     return returning
 
 

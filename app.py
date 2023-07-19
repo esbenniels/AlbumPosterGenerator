@@ -84,11 +84,8 @@ def urlSubmit():
         return redirect(url_for('index'))
     else:
         url = request.form.get('SpotifyUrl')
-        fields = ["coverDim", "codeDim", "cornerTextSize", "artistSize", 
-                  "titleSize", "trackSize", "maxLabelLength", "maxArtistsLength", 
-                  "maxTitleLength", "maxTrackLineWidth", "trackLineSpace"]
         newParams = {}
-        for field in fields:
+        for field in defaultParams:
             if not request.form.get(field, None) or request.form.get(field, None) == defaultParams[field]:
                 newParams[field] = int(defaultParams[field])
             else:
