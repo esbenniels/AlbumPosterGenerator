@@ -92,9 +92,14 @@ def urlSubmit():
     else:
         url = request.form.get('SpotifyUrl')
 
-        albumID = re.findall('album/(.*)\?', url)[0]
+        try:
+            albumID = re.findall('album/(.*)\?', url)[0]
+        except:
+            flash("REDInvalid Spotify album URL. Try copying the link from Spotify's share options")
+            return render_template("index.html", current_user=current_user, defaultParams = defaultParams)
+
         if len(albumID) != 22:
-            flash("Invalid Spotify album URL. Try copying the link from Spotify's share options.")
+            flash("REDInvalid Spotify album URL. Try copying the link from Spotify's share options.")
             return render_template("index.html", current_user=current_user, defaultParams = defaultParams)
 
         try:
@@ -130,7 +135,7 @@ def urlSubmit():
             db.session.add(newAlbum)
             db.session.commit()
 
-        flash("Album poster successfully generated")
+        flash("GREENAlbum poster successfully generated")
         return render_template("index.html", current_user = current_user, 
                                posterPath = "PosterStorage/user"+str(current_user.id)+f"/{albumID}.png",
                                defaultParams = newParams,
@@ -150,7 +155,7 @@ def posterHistory():
             paramDict[poster] = data[poster.replace('.png','')]
         handle.close()
 
-    numRows = (len(posterNames)//4)+1
+    numRows = (len(posterNames)//4)+1 if len(posterNames) > 0 else 0
 
     print("Posters: ", posterNames)
     print("Number of posters to show: ", len(posterNames))

@@ -52,7 +52,23 @@
                     document.getElementById("loader").style.display = "block";
                 }
             </script>
-
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% if messages[0].__contains__('GREEN') %}
+                    <div style="color: green;">
+                        {{ messages[0].replace("GREEN", "") }}
+                    </div>
+                {% elif messages[0].__contains__('RED') %}
+                    <div style="color: red;">
+                        {{ messages[0].replace("RED", "") }}
+                    </div>
+                {% else %}
+                    <div>
+                        {{ messages[0] }}
+                    </div>
+                {% endif %}
+            {% endif %}
+            {% endwith %}
             <form action="{{ url_for('urlSubmit') }}" method="post" enctype="multipart/form-data"
                 class="text-left" id="genForm" onsubmit="enableLoader()">
                 <div class="row">

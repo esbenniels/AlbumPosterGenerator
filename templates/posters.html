@@ -93,7 +93,7 @@
                                 value="{{ paramDict[posterNames[4*i+j]]['trackLineSpace'] }}" style="display: none;">
                                 <input type="number" id="11" name="maxTracks" class="form-control"
                                 value="{{ paramDict[posterNames[4*i+j]]['maxTracks'] }}" style="display: none;">
-                                <img style="width: 200px; height: 300px;" 
+                                <img style="width: 65%;" 
                                     src="{{ url_for('static', filename = 'PosterStorage/user'+current_user.id | string() + '/' + posterNames[4*i + j]) }}" alt="">
                                 <br><br>
                                 <button type="submit" class="btn btn-primary">Go to Generator</button>
@@ -103,6 +103,7 @@
                         </div>
                         {% endfor %}
                     </div>
+                    <br>
                     <br>
                     {% endfor %}
                 <!-- </tbody> -->

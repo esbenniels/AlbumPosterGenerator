@@ -258,10 +258,18 @@ def writeTracks(draw: ImageDraw, details: dict):
                 else:
                     build += " " + words[0]
                 words.pop(0)
+            # next word is too long to fully include
             else:
+                # if this is the first word in a line, it will therefore take up the whole line
                 if build == "":
-                    parts.append(words[0])
+                    print("Entered special case for ", words[0])
+                    build = words[0]
+                    while len(build) > defaultParams['maxTrackLineWidth']:
+                        parts.append(build[:defaultParams['maxTrackLineWidth']])
+                        build = build[defaultParams['maxTrackLineWidth']:]
+                    parts.append(build)
                     words.pop(0)
+                    build = ""
                 else:
                     parts.append(build)
                     build = ""
