@@ -137,7 +137,7 @@ def urlSubmit():
 
         flash("GREENAlbum poster successfully generated")
         return render_template("index.html", current_user = current_user, 
-                               posterPath = "PosterStorage/user"+str(current_user.id)+f"/{albumID}.png",
+                               posterPath = "PosterStorage/user"+str(current_user.id)+f"/poster.png",
                                defaultParams = newParams,
                                lastAlbum = url)
 
@@ -146,13 +146,14 @@ def urlSubmit():
 def posterHistory():
 
     posterNames = os.listdir(f"static\\PosterStorage\\user{str(current_user.id)}")
-    posterNames = [file for file in posterNames if file.__contains__('.png')]
+    posterNames = [file for file in posterNames if file.__contains__('.png') and not file.__contains__("poster")]
 
     paramDict = {}
     with open(f"static/PosterStorage/user{str(current_user.id)}/data.json", 'r+') as handle:
         data = json.load(handle)
         for poster in posterNames:
-            paramDict[poster] = data[poster.replace('.png','')]
+            if not poster.__contains__("poster"):
+                paramDict[poster] = data[poster.replace('.png','')]
         handle.close()
 
     numRows = (len(posterNames)//4)+1 if len(posterNames) > 0 else 0

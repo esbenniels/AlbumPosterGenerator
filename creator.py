@@ -30,7 +30,9 @@ defaultParams = {
     "maxTitleLength" : 11,
     "maxTrackLineWidth" : 15,
     "trackLineSpace" : 33,
-    "maxTracks": 30
+    "maxTracks": 30,
+    "sCodePos": 1736,
+    "includeFullTitle": False
 }
 
 
@@ -199,6 +201,12 @@ def writeText(draw: ImageDraw, details: dict):
         draw.text((1250, 1370), f"{details['artists'].upper()[:defaultParams['maxArtistsLength']] + '...'}", (0,0,0), font=artistFont, anchor='rt')
 
     if len(details['name']) <= 10:
+        if not defaultParams['includeFullTitle']:
+            try:
+                pIndex = details['name'].index("(")
+                details['name'] = details['name'][:pIndex]
+            except:
+                pass
         draw.text((1250, 1435), f"{details['name'].upper()}", (0,0,0), font=titleFont, anchor='rt')
     else:
         name = details['name'].upper()
@@ -311,7 +319,7 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
     canvas.paste(albumCover, (83,83))
     # getting spotify code
     sCode = getSpotifyCode(url, 'album')
-    canvas.paste(sCode, (805,1736))
+    canvas.paste(sCode, (805,defaultParams['sCodePos']))
 
     returning = None
 
@@ -340,7 +348,13 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
     # Handling tracks
     writeTracks(draw, details)
 
-    canvas.save(f"static/PosterStorage{saveFolder}/{details['id']}.png")
+    # save temporary full-size copy
+    canvas.save(f"static/PosterStorage{saveFolder}/poster.png")
+    # saving permanent thumbnail copy for lesser storage use
+    thumbnail = cv2.imread(f"static/PosterStorage{saveFolder}/poster.png")
+    thumbnail = cv2.resize(thumbnail, (500, 750), interpolation=cv2.INTER_LANCZOS4)
+    cv2.imwrite(f"static/PosterStorage{saveFolder}/{details['id']}.png", thumbnail)
+
     # print("Returning from handleURL: ", returning)
 
     with open(f"static/PosterStorage{saveFolder}/data.json", 'r+') as handle:

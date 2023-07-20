@@ -44,7 +44,7 @@
         
         <div class="text-center" id="content">
             <div class="text-center">
-                <h2>Spotify Album/Playlist Poster Generator</h2>
+                <h2>Spotify Album Poster Generator</h2>
             </div>
             <br>
             <script>
@@ -94,10 +94,16 @@
                         <input type="number" id="2" name="coverDim" class="form-control"
                             value="{{ defaultParams['coverDim'] }}">
                         <br>
-                        <label for="3">Spotify Code Dimension</label>
+                        <label for="3">Spotify Code Dimension (width)</label>
                         <input type="number" id="3" name="codeDim" class="form-control"
                             value="{{ defaultParams['codeDim'] }}">
                         <br>
+                        <label for="1">Spotify Code Position (y)</label>
+                        <input type="number" id="1" name="sCodePos" class="form-control"
+                            value="{{ defaultParams['sCodePos'] }}">
+                        <br>
+                        <label for="fullTitle">Include Full Album Title</label>
+                        <input type="checkbox" id="fullTitle" name="includeFullTitle" checked="{{ defaultParams['includeFullTitle'] }}">
                     </div>
                     <div class="col-md-3">
                         <h5>Text Sizes</h5>

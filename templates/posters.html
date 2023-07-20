@@ -44,7 +44,7 @@
 
         <div class="text-center" id="content">
             <div class="text-center">
-                <h2>Spotify Album/Playlist Poster Generator</h2>
+                <h2>Spotify Album Poster Generator</h2>
             </div>
             <br>
             <script>
@@ -91,8 +91,15 @@
                                 value="{{ paramDict[posterNames[4*i+j]]['maxTrackLineWidth'] }}" style="display: none;">
                                 <input type="number" id="11" name="trackLineSpace" class="form-control"
                                 value="{{ paramDict[posterNames[4*i+j]]['trackLineSpace'] }}" style="display: none;">
-                                <input type="number" id="11" name="maxTracks" class="form-control"
+                                <input type="number" id="12" name="maxTracks" class="form-control"
                                 value="{{ paramDict[posterNames[4*i+j]]['maxTracks'] }}" style="display: none;">
+                                <input type="number" id="13" name="sCodePos" class="form-control"
+                                value="{{ paramDict[posterNames[4*i+j]]['sCodePos'] }}" style="display: none;">
+                                {% if paramDict[posterNames[4*i+j]]['includeFullTitle']% }
+                                <input type="checkbox" id="14" name="includeFullTitle" class="form-control" style="display: none;" checked>
+                                {% else %}
+                                <input type="checkbox" id="14" name="includeFullTitle" class="form-control" style="display: none;">
+                                {% endif %}
                                 <img style="width: 65%;" 
                                     src="{{ url_for('static', filename = 'PosterStorage/user'+current_user.id | string() + '/' + posterNames[4*i + j]) }}" alt="">
                                 <br><br>
