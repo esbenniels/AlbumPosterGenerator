@@ -103,7 +103,11 @@
                             value="{{ defaultParams['sCodePos'] }}">
                         <br>
                         <label for="fullTitle">Include Full Album Title</label>
-                        <input type="checkbox" id="fullTitle" name="includeFullTitle" checked="{{ defaultParams['includeFullTitle'] }}">
+                        {% if defaultParams['includeFullTitle'] %}
+                            <input type="checkbox" id="fullTitle" name="includeFullTitle" checked>
+                        {% else %}
+                            <input type="checkbox" id="fullTitle" name="includeFullTitle">
+                        {% endif %}
                     </div>
                     <div class="col-md-3">
                         <h5>Text Sizes</h5>

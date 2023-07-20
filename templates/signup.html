@@ -42,16 +42,16 @@
             <br>
             <div class="text-center">
                 {% with messages = get_flashed_messages() %}
-             {% if messages %}
-                 {% if messages[0].__contains__('GREEN') %}
+                {% if messages %}
+                    {% if messages[0].__contains__('GREEN') %}
                      <div style="color: green;">
                          {{ messages[0].replace("GREEN", "") }}
                      </div>
-                 {% elif messages[0].__contains__('RED') %}
+                    {% elif messages[0].__contains__('RED') %}
                      <div style="color: red;">
                          {{ messages[0].replace("RED", "") }}
                      </div>
-                 {% endif %}
+                    {% endif %}
              {% endif %}
              {% endwith %}
                <br>

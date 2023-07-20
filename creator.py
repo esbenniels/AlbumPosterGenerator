@@ -32,11 +32,24 @@ defaultParams = {
     "trackLineSpace" : 33,
     "maxTracks": 30,
     "sCodePos": 1736,
-    "includeFullTitle": False
+    "includeFullTitle": 0
 }
+
+class ProgressBar(Bar):
+    message = "Generating Album Poster ... "
+    fill = "#"
+    suffix = "%(index)d/%(max)d --> %(current_status)s"
+    def setStatus(self, name:str):
+        self.status = name
+    @property
+    def current_status(self):
+        return self.status
 
 
 def handleURL(url: str, params: dict[str, int] = defaultParams, saveFolder: str = "", colors: list[tuple[int, int, int]] = None):
+    global bar, startTime
+    bar = ProgressBar(max=9)
+    startTime = datetime.now()
     if "album" in url:
         return createAlbumPoster(url, params, saveFolder, colors)
     else:
@@ -200,13 +213,14 @@ def writeText(draw: ImageDraw, details: dict):
     else:
         draw.text((1250, 1370), f"{details['artists'].upper()[:defaultParams['maxArtistsLength']] + '...'}", (0,0,0), font=artistFont, anchor='rt')
 
+    if defaultParams['includeFullTitle'] == 0:
+        try:
+            pIndex = details['name'].index("(")
+            details['name'] = details['name'][:pIndex]
+        except:
+            pass
+
     if len(details['name']) <= 10:
-        if not defaultParams['includeFullTitle']:
-            try:
-                pIndex = details['name'].index("(")
-                details['name'] = details['name'][:pIndex]
-            except:
-                pass
         draw.text((1250, 1435), f"{details['name'].upper()}", (0,0,0), font=titleFont, anchor='rt')
     else:
         name = details['name'].upper()
@@ -309,21 +323,28 @@ def writeTracks(draw: ImageDraw, details: dict):
 def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFolder: str = "", colors: list[list[int]] = None):
     details = getAlbumDetails(url)
 
-    global defaultParams
+    global defaultParams, bar
     defaultParams = params
 
     # Full canvas
+    bar.setStatus("Creating canvas ... ")
     canvas = Image.new('RGBA', (1333,2000), (255,255,255))
+    bar.next()
     # Getting album cover (640x640)
+    bar.setStatus("Getting album cover ... ")
     albumCover = getAlbumCover(details['coverURL'])
     canvas.paste(albumCover, (83,83))
+    bar.next()
     # getting spotify code
+    bar.setStatus("Getting spotify code ... ")
     sCode = getSpotifyCode(url, 'album')
     canvas.paste(sCode, (805,defaultParams['sCodePos']))
+    bar.next()
 
     returning = None
 
     # handling color squares
+    bar.setStatus("Generating colors squares ... ")
     if colors:
         # print("Colors passed in from database")
         sortedRGB = sorted(colors, key=lambda triple: sum(triple))
@@ -334,29 +355,37 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
         # print("No colors passed from database")
         sortedRGB = getTopColors()
         returning = sortedRGB
-    
     coords = [(1167,1270), (1056,1270), (944,1270), (833,1270), (722,1270) ]
     for i in range(len(sortedRGB)):
         # make square, place at correct location
         block = Image.new("RGBA", (83,83), (int(sortedRGB[i][0]), int(sortedRGB[i][1]), int(sortedRGB[i][2])))
         canvas.paste(block, coords[i])
+    bar.next()
 
     # Handling Label & Album Length
+    bar.setStatus("Writing album info ... ")
     draw = ImageDraw.Draw(canvas)
     writeText(draw, details)
+    bar.next()
 
     # Handling tracks
+    bar.setStatus("Writing album tracks ... ")
     writeTracks(draw, details)
+    bar.next()
 
     # save temporary full-size copy
+    bar.setStatus("Saving album poster ... ")
     canvas.save(f"static/PosterStorage{saveFolder}/poster.png")
+    bar.next()
     # saving permanent thumbnail copy for lesser storage use
+    bar.setStatus("Saving thumbnail copy ... ")
     thumbnail = cv2.imread(f"static/PosterStorage{saveFolder}/poster.png")
     thumbnail = cv2.resize(thumbnail, (500, 750), interpolation=cv2.INTER_LANCZOS4)
     cv2.imwrite(f"static/PosterStorage{saveFolder}/{details['id']}.png", thumbnail)
+    bar.next()
 
     # print("Returning from handleURL: ", returning)
-
+    bar.setStatus("Writing to data.json ... ")
     with open(f"static/PosterStorage{saveFolder}/data.json", 'r+') as handle:
         data: dict = json.load(handle)
         data[details['id']] = params
@@ -364,4 +393,6 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
     with open(f"static/PosterStorage{saveFolder}/data.json", 'w+') as handle:
         json.dump(data, handle)
         handle.close()
+    bar.next()
+    bar.finish()
     return returning

@@ -110,12 +110,19 @@ def urlSubmit():
         
         newParams = {}
         for field in defaultParams:
+            if field == "includeFullTitle":
+                # checkbox field found
+                if request.form.get(field, None):
+                    newParams[field] = 1
+                else:
+                    newParams[field] = 0
+                continue
             if not request.form.get(field, None) or request.form.get(field, None) == defaultParams[field]:
                 newParams[field] = int(defaultParams[field])
             else:
                 newParams[field] = int(request.form.get(field))
 
-        print("Passing Parameters: ", newParams)
+        # print("Passing Parameters: ", newParams)
 
         a = Album.query.filter_by(id = re.findall('album/(.*)\?', url)[0]).first()
         if a:
@@ -123,11 +130,11 @@ def urlSubmit():
             handleURL(url, newParams, "/user"+str(current_user.id), colors)
         else:
             colors = handleURL(url, newParams, "/user"+str(current_user.id))
-            print("Colors received in app.py: ", colors)
+            # print("Colors received in app.py: ", colors)
             for i in range(len(colors), 5):
                 colors.insert(i, [255,255,255])
 
-            print("New Album detected: ", colors)
+            # print("New Album detected: ", colors)
             newAlbum = Album(id = re.findall('album/(.*)\?', url)[0], r1 = colors[0][0], 
                 r2=colors[1][0], r3=colors[2][0], r4=colors[3][0], r5=colors[4][0],
                 g1=colors[0][1], g2=colors[1][1], g3=colors[2][1], g4=colors[3][1], g5=colors[4][1],
@@ -158,9 +165,9 @@ def posterHistory():
 
     numRows = (len(posterNames)//4)+1 if len(posterNames) > 0 else 0
 
-    print("Posters: ", posterNames)
-    print("Number of posters to show: ", len(posterNames))
-    print("Number of rows: ", numRows)
+    # print("Posters: ", posterNames)
+    # print("Number of posters to show: ", len(posterNames))
+    # print("Number of rows: ", numRows)
     numColumns : list[int] = []
     tracker = len(posterNames)
     for i in range(numRows):
@@ -170,10 +177,10 @@ def posterHistory():
         else:
             numColumns.append(4)
             tracker -= 4
-    print("Number of columns: ", numColumns)
+    # print("Number of columns: ", numColumns)
 
     albumNames = list(spotify.album(albumID.replace(".png",""))['name'] for albumID in posterNames)
-    print(albumNames)
+    # print(albumNames)
     return render_template("posters.html",
                            posterNames = posterNames,
                            paramDict = paramDict,
@@ -198,8 +205,8 @@ def loginPost():
     # check if the user actually exists
     # take the user-supplied password, hash it, and compare it to the hashed password in the database
     if not user or not check_password_hash(user.password, password):
-        flash('Please check your login details and try again.')
-        return redirect(url_for('login')) # if the user doesn't exist or password is wrong, reload the page
+        flash('REDPlease check your login details and try again.')
+        return render_template('login.html') # if the user doesn't exist or password is wrong, reload the page
 
     login_user(user, remember=remember)
 
@@ -221,8 +228,8 @@ def signupPost():
     user = User.query.filter_by(email=email).first() # if this returns a user, then the email already exists in database
 
     if user: # if a user is found, we want to redirect back to signup page so user can try again
-        flash("Email address already exists")
-        return redirect(url_for('signup'))
+        flash("REDEmail address already exists")
+        return render_template("signup.html")
 
     engine = db.get_engine().connect()
     result = engine.exec_driver_sql("""SELECT id FROM user;""")

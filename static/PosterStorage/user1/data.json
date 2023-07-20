@@ -12,13 +12,14 @@
         "maxTrackLineWidth": 15,
         "trackLineSpace": 33,
         "maxTracks": 30,
-        "sCodePos": 1736
+        "sCodePos": 1736,
+        "includeFullTitle": 1
     },
     "6n9DKpOxwifT5hOXtgLZSL": {
         "coverDim": 1166,
         "codeDim": 444,
         "cornerTextSize": 30,
-        "artistSize": 57,
+        "artistSize": 57, 
         "titleSize": 79,
         "trackSize": 26,
         "maxLabelLength": 40,
@@ -27,6 +28,7 @@
         "maxTrackLineWidth": 15,
         "trackLineSpace": 33,
         "maxTracks": 30,
-        "sCodePos": 1736
+        "sCodePos": 1736,
+        "includeFullTitle": 0
     }
 }
