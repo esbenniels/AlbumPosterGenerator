@@ -196,6 +196,7 @@ def posterHistory():
     # print(albumNames)
     return render_template("posters.html",
                            posterNames = posterNames,
+                           numPosters = len(posterNames),
                            paramDict = paramDict,
                            numRows = numRows,
                            numColumns = numColumns,
