@@ -95,18 +95,26 @@ def urlSubmit():
         try:
             albumID = re.findall('album/(.*)\?', url)[0]
         except:
-            flash("REDInvalid Spotify album URL. Try copying the link from Spotify's share options")
-            return render_template("index.html", current_user=current_user, defaultParams = defaultParams)
+            try:
+                albumID = re.findall('playlist/(.*)\?', url)[0]
+            except:
+                print("regex fail")
+                flash("REDInvalid Spotify album URL. Try copying the link from Spotify's share options")
+                return render_template("index.html", current_user=current_user, defaultParams = defaultParams)
 
         if len(albumID) != 22:
+            print("idLength fail")
             flash("REDInvalid Spotify album URL. Try copying the link from Spotify's share options.")
             return render_template("index.html", current_user=current_user, defaultParams = defaultParams)
 
         try:
             results = spotify.album(albumID)
         except:
-            flash("REDError retrieving Spotify Album. Check URL")
-            return render_template("index.html", current_user=current_user, defaultParams = defaultParams)
+            try:
+                results = spotify.playlist(albumID)
+            except:
+                flash("REDError retrieving Spotify Album. Check URL")
+                return render_template("index.html", current_user=current_user, defaultParams = defaultParams)
         
         newParams = {}
         for field in defaultParams:
@@ -124,7 +132,7 @@ def urlSubmit():
 
         # print("Passing Parameters: ", newParams)
 
-        a = Album.query.filter_by(id = re.findall('album/(.*)\?', url)[0]).first()
+        a = Album.query.filter_by(id = albumID).first()
         if a:
             colors = [[a.r1, a.g1, a.b1],[a.r2, a.g2, a.b2],[a.r3, a.g3, a.b3],[a.r4, a.g4, a.b4],[a.r5, a.g5, a.b5]]
             handleURL(url, newParams, "/user"+str(current_user.id), colors)
@@ -135,7 +143,7 @@ def urlSubmit():
                 colors.insert(i, [255,255,255])
 
             # print("New Album detected: ", colors)
-            newAlbum = Album(id = re.findall('album/(.*)\?', url)[0], r1 = colors[0][0], 
+            newAlbum = Album(id = albumID, r1 = colors[0][0], 
                 r2=colors[1][0], r3=colors[2][0], r4=colors[3][0], r5=colors[4][0],
                 g1=colors[0][1], g2=colors[1][1], g3=colors[2][1], g4=colors[3][1], g5=colors[4][1],
                 b1=colors[0][2], b2=colors[1][2], b3=colors[2][2], b4=colors[3][2], b5=colors[4][2])
@@ -178,8 +186,13 @@ def posterHistory():
             numColumns.append(4)
             tracker -= 4
     # print("Number of columns: ", numColumns)
+    albumPlaylistNames: list[str] = []
 
-    albumNames = list(spotify.album(albumID.replace(".png",""))['name'] for albumID in posterNames)
+    for albumID in posterNames:
+        try:
+            albumPlaylistNames.append(spotify.album(albumID.replace(".png",""))['name'])
+        except:
+            albumPlaylistNames.append(spotify.playlist(albumID.replace(".png",""))['name'])
     # print(albumNames)
     return render_template("posters.html",
                            posterNames = posterNames,
@@ -187,7 +200,7 @@ def posterHistory():
                            numRows = numRows,
                            numColumns = numColumns,
                            current_user = current_user,
-                           albumNames = albumNames)
+                           albumNames = albumPlaylistNames)
 
 @app.route('/login')
 def login():

@@ -22,3 +22,11 @@ Bottom right text   NWlocation = (972, 1858)  dimensions (278, 73)    size = 21
 artist              NElocation = (1250, 1361)   
 
 https://scannables.scdn.co/uri/plain/png/FFFFFF/black/640/spotify:playlist:4wuGkZLDCgKVttJtfLmVmg
+
+For PLAYLISTS
+artist: results['owner']['display_name']
+title: results['name']
+description: results['description'] | null
+duration: for song in results['tracks']['items'];
+            sum += song['track']['duration_ms']
+coverImage: results['images']

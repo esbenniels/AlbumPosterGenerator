@@ -52,6 +52,8 @@ def handleURL(url: str, params: dict[str, int] = defaultParams, saveFolder: str 
     startTime = datetime.now()
     if "album" in url:
         return createAlbumPoster(url, params, saveFolder, colors)
+    elif "playlist" in url:
+        return createPlaylistPoster(url, params, saveFolder, colors)
     else:
         return "Not a Spotify playlist or poster URL"
 
@@ -104,12 +106,40 @@ def getAlbumDetails(url: str) -> dict:
     
     # https://open.spotify.com/album/5MS3MvWHJ3lOZPLiMxzOU6?si=6GDOWf7nSnaqsDa-BbIH5Q
 
-def getTopColors() -> list[list[int]]:
+def getPlaylistDetails(url:str) -> dict:
+    playlistID = re.findall('playlist/(.*)\?', url)
+    spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+
+    results = spotify.playlist(playlistID[0])
+
+    totalDuration = sum([song['track']['duration_ms'] for song in results['tracks']['items']])
+
+    trackStruct : list[dict] = [
+        {
+            "href": song['track']['href'],
+            "name": song['track']['name'],
+            "id": song['track']['id'],
+            "duration": song['track']['duration_ms']
+        }
+        for song in results['tracks']['items']
+    ]
+
+    return {
+        "id": playlistID[0],
+        'name': results['name'],
+        'owner': results['owner']['display_name'],
+        'description': results['description'],
+        'length': totalDuration,
+        'coverURL': results['images'][0]['url'],
+        'tracks': trackStruct
+    }
+
+def getTopColors(sType: str = "album") -> list[list[int]]:
     
     NUM_CLUSTERS = 5
 
     # bar = Bar("Finding dominant colors ", max=4)
-    im = Image.open("album_cover.jpg")
+    im = Image.open(f"{sType}_cover.jpg")
     # bar.next()
     ar = np.asarray(im)
     shape = ar.shape
@@ -165,12 +195,12 @@ def getTopColorsAlone(url: str) -> list[list[int]]:
         # print("{0:<7}{1:<7.2f}{2:<7.2f}{3:<7.2f}{4:<7.2f}".format(i+1, sortedCodes[i][0], sortedCodes[i][1], sortedCodes[i][2], sum(sortedCodes[i])))
     return list(sortedCodes)
 
-def getAlbumCover(url: str) -> Image:
-    urllib.request.urlretrieve(url, "album_cover.jpg")
-    im = cv2.imread("album_cover.jpg")
+def getCover(url: str, sType: str = 'album') -> Image:
+    urllib.request.urlretrieve(url, f"{sType}_cover.jpg")
+    im = cv2.imread(f"{sType}_cover.jpg")
     im = cv2.resize(im, (defaultParams['coverDim'],defaultParams['coverDim']), interpolation=cv2.INTER_LANCZOS4)
-    cv2.imwrite("album_cover.jpg", im)
-    resizedCover = Image.open('album_cover.jpg')
+    cv2.imwrite(f"{sType}_cover.jpg", im)
+    resizedCover = Image.open(f"{sType}_cover.jpg")
     return resizedCover
 
 def getSpotifyCode(url: str, sType: str = 'album') -> Image:
@@ -184,11 +214,11 @@ def getSpotifyCode(url: str, sType: str = 'album') -> Image:
     code = Image.open('spotify_code.png')
     return code
 
-def getAlbumLength(trackStruct: list[dict]) -> str:
+def getLength(trackStruct: list[dict]) -> str:
     totalMS = sum(song['duration'] for song in trackStruct)
     # print("Total Album MS: ", totalMS)
     delta = timedelta(milliseconds=totalMS)
-    min = ((delta.seconds // 60)-60) if (delta.seconds // 60) >= 60 else (delta.seconds // 60)
+    min = (delta.seconds // 60)-((delta.seconds // 3600)*60) if (delta.seconds // 60) >= 60 else (delta.seconds // 60)
     sec = delta.seconds % 60
     hr = delta.seconds // 3600
     return f"{hr:02d}.{min:02d}.{sec:02d}"
@@ -201,7 +231,7 @@ def writeText(draw: ImageDraw, details: dict):
         draw.text((83,1858), f"LABEL: {details['label'].upper()}", (0,0,0), font=boldText, anchor='lt')
     else:
         draw.text((83,1858), f"LABEL: {details['label'].upper()[:defaultParams['maxLabelLength']]+'...'}", (0,0,0), font=boldText, anchor='lt')
-    draw.text((83,1894), f"ALBUM LENGTH: {getAlbumLength(details['tracks'])}", (0,0,0), font=boldText, anchor='lt')
+    draw.text((83,1894), f"ALBUM LENGTH: {getLength(details['tracks'])}", (0,0,0), font=boldText, anchor='lt')
 
     # Release Date Text
     draw.text((1250, 1858), f"RELEASED ON", (0,0,0), font=boldText, anchor='rt')
@@ -248,6 +278,93 @@ def writeText(draw: ImageDraw, details: dict):
 
         for j in range(len(parts)):
             draw.text((1250, 1435 + (j*82)), f"{parts[j]}", (0,0,0), font=titleFont, anchor='rt')
+
+def writePlaylistText(draw: ImageDraw, details: dict):
+    boldText = ImageFont.truetype('SourceSans3-ExtraBold.ttf', defaultParams['cornerTextSize'])
+    artistFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['artistSize'])
+    titleFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['titleSize'])
+    # if len(details['label'].upper()) <= defaultParams['maxLabelLength']:
+    #     draw.text((83,1858), f"LABEL: {details['label'].upper()}", (0,0,0), font=boldText, anchor='lt')
+    # else:
+    #     draw.text((83,1858), f"LABEL: {details['label'].upper()[:defaultParams['maxLabelLength']]+'...'}", (0,0,0), font=boldText, anchor='lt')
+    draw.text((83,1858), f"PLAYLIST LENGTH: {getLength(details['tracks'])}", (0,0,0), font=boldText, anchor='lt')
+
+    # Writing description
+
+    if len(details['description']) <= 40:
+        draw.text((1250, 1858), f"{details['description'].upper()}", (0,0,0), font=ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", 20), anchor='rt')
+    else:
+        name = details['description'].upper()
+        words : list = name.split(' ')
+        parts : list[str] = []
+        
+        build = ""
+        while len(words) > 0:
+            # print("considering ", words[0], "-->", build)
+            if len(build + " " + words[0]) <= 40:
+                if len(build) == 0:
+                    build += words[0]
+                else:
+                    build += " " + words[0]
+                words.pop(0)
+            else:
+                if build == "":
+                    parts.append(words[0])
+                    words.pop(0)
+                else:
+                    parts.append(build)
+                    build = ""
+        parts.append(build)
+        # print(parts)
+
+        for j in range(len(parts)):
+            draw.text((1250, 1858 + (j*24)), f"{parts[j]}", (0,0,0), font=ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", 20), anchor='rt')
+
+    # draw.text((1250, 1858), details['description'], (0,0,0), font=ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", 18), anchor='rt')
+    # draw.text((1250,1894), f"{details['releaseDate'].upper()}", (0,0,0), font=boldText, anchor='rt')
+
+    # Artist Font
+    if len(details['owner'].upper()) <= defaultParams['maxArtistsLength']:
+        draw.text((1250, 1370), f"{details['owner'].upper()}", (0,0,0), font=artistFont, anchor='rt')
+    else:
+        draw.text((1250, 1370), f"{details['owner'].upper()[:defaultParams['maxArtistsLength']] + '...'}", (0,0,0), font=artistFont, anchor='rt')
+
+    if defaultParams['includeFullTitle'] == 0:
+        try:
+            pIndex = details['name'].index("(")
+            details['name'] = details['name'][:pIndex]
+        except:
+            pass
+
+    if len(details['name']) <= 10:
+        draw.text((1250, 1435), f"{details['name'].upper()}", (0,0,0), font=titleFont, anchor='rt')
+    else:
+        name = details['name'].upper()
+        words : list = name.split(' ')
+        parts : list[str] = []
+        
+        build = ""
+        while len(words) > 0:
+            # print("considering ", words[0], "-->", build)
+            if len(build + " " + words[0]) <= defaultParams['maxTitleLength']+(len(parts)):
+                if len(build) == 0:
+                    build += words[0]
+                else:
+                    build += " " + words[0]
+                words.pop(0)
+            else:
+                if build == "":
+                    parts.append(words[0])
+                    words.pop(0)
+                else:
+                    parts.append(build)
+                    build = ""
+        parts.append(build)
+        # print(parts)
+
+        for j in range(len(parts)):
+            draw.text((1250, 1435 + (j*82)), f"{parts[j]}", (0,0,0), font=titleFont, anchor='rt')
+    
 
 def writeTracks(draw: ImageDraw, details: dict):
     trackFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['trackSize'])
@@ -332,7 +449,7 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
     bar.next()
     # Getting album cover (640x640)
     bar.setStatus("Getting album cover ... ")
-    albumCover = getAlbumCover(details['coverURL'])
+    albumCover = getCover(details['coverURL'], 'album')
     canvas.paste(albumCover, (83,83))
     bar.next()
     # getting spotify code
@@ -396,3 +513,82 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
     bar.next()
     bar.finish()
     return returning
+
+def createPlaylistPoster(url: str, params: dict[str, int] = defaultParams, saveFolder: str = "", colors: list[list[int]] = None):
+    details = getPlaylistDetails(url)
+
+    global defaultParams, bar
+    defaultParams = params
+
+    # Full canvas
+    bar.setStatus("Creating canvas ... ")
+    canvas = Image.new('RGBA', (1333,2000), (255,255,255))
+    bar.next()
+    # Getting album cover (640x640)
+    bar.setStatus("Getting playlist cover ... ")
+    playCover = getCover(details['coverURL'], 'playlist')
+    canvas.paste(playCover, (83,83))
+    bar.next()
+    # getting spotify code
+    bar.setStatus("Getting spotify code ... ")
+    sCode = getSpotifyCode(url, 'playlist')
+    canvas.paste(sCode, (805,defaultParams['sCodePos']))
+    bar.next()
+
+    returning = None
+
+    # handling color squares
+    bar.setStatus("Generating colors squares ... ")
+    if colors:
+        # print("Colors passed in from database")
+        sortedRGB = sorted(colors, key=lambda triple: sum(triple))
+        # print("\n{0:<7}{1:<7}{2:<7}{3:<7}{4:<7}".format("Color", "Red", "Green", "Blue", "Brightness"))
+        # for i in range(len(sortedRGB)):
+            # print("{0:<7}{1:<7.2f}{2:<7.2f}{3:<7.2f}{4:<7.2f}".format(i+1, sortedRGB[i][0], sortedRGB[i][1], sortedRGB[i][2], sum(sortedRGB[i])))
+    else:
+        # print("No colors passed from database")
+        sortedRGB = getTopColors('playlist')
+        returning = sortedRGB
+    coords = [(1167,1270), (1056,1270), (944,1270), (833,1270), (722,1270) ]
+    for i in range(len(sortedRGB)):
+        # make square, place at correct location
+        block = Image.new("RGBA", (83,83), (int(sortedRGB[i][0]), int(sortedRGB[i][1]), int(sortedRGB[i][2])))
+        canvas.paste(block, coords[i])
+    bar.next()
+
+    # Handling Label & Album Length
+    bar.setStatus("Writing playlist info ... ")
+    draw = ImageDraw.Draw(canvas)
+    writePlaylistText(draw, details)
+    bar.next()
+
+    # Handling tracks
+    bar.setStatus("Writing playlist tracks ... ")
+    writeTracks(draw, details)
+    bar.next()
+
+    # save temporary full-size copy
+    bar.setStatus("Saving playlist poster ... ")
+    canvas.save(f"static/PosterStorage{saveFolder}/poster.png")
+    bar.next()
+    # saving permanent thumbnail copy for lesser storage use
+    bar.setStatus("Saving thumbnail copy ... ")
+    thumbnail = cv2.imread(f"static/PosterStorage{saveFolder}/poster.png")
+    thumbnail = cv2.resize(thumbnail, (500, 750), interpolation=cv2.INTER_LANCZOS4)
+    cv2.imwrite(f"static/PosterStorage{saveFolder}/{details['id']}.png", thumbnail)
+    bar.next()
+
+    # print("Returning from handleURL: ", returning)
+    bar.setStatus("Writing to data.json ... ")
+    with open(f"static/PosterStorage{saveFolder}/data.json", 'r+') as handle:
+        data: dict = json.load(handle)
+        data[details['id']] = params
+        handle.close()
+    with open(f"static/PosterStorage{saveFolder}/data.json", 'w+') as handle:
+        json.dump(data, handle)
+        handle.close()
+    bar.next()
+    bar.finish()
+    return returning
+
+    # https://open.spotify.com/playlist/37i9dQZF1DXdyjMX5o2vCq?si=eeb678ba212b4b71
