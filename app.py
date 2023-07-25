@@ -194,14 +194,26 @@ def posterHistory():
         except:
             albumPlaylistNames.append(spotify.playlist(albumID.replace(".png",""))['name'])
     # print(albumNames)
+
+    bigStruct: list[dict] = [
+        {
+            "file": posterNames[i],
+            "name": albumPlaylistNames[i],
+            "params": paramDict[posterNames[i]]
+        }
+        for i in range(len(posterNames))
+    ]
+
     return render_template("posters.html",
-                           posterNames = posterNames,
-                           numPosters = len(posterNames),
-                           paramDict = paramDict,
-                           numRows = numRows,
-                           numColumns = numColumns,
-                           current_user = current_user,
-                           albumNames = albumPlaylistNames)
+                        #    posterNames = posterNames,
+                        allData = bigStruct,
+                        numPosters = len(posterNames),
+                        #    paramDict = paramDict,
+                        numRows = numRows,
+                        numColumns = numColumns,
+                        current_user = current_user,
+                        #    albumNames = albumPlaylistNames
+                    )
 
 @app.route('/login')
 def login():

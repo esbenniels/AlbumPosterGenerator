@@ -115,18 +115,88 @@
                 function enableLoader() {
                     document.getElementById("loader").style.display = "block";
                 }
-            </script>
-            <script>
+                function clear(parent) {
+                    while (parent.firstChild) {
+                        parent.removeChild(parent.firstChild);
+                    }
+                }
                 function reorderAlbums() {
-                    var orderedAlbumNames = [];
-                    let searchString = document.getElementById('search').value;
-                    for (const name of {{ posterNames | list }}) {
-                        let similarity = JaroWrinker(name, searchString);
+                    var data = JSON.parse('{{ allData | tojson }}');
+                    var newData = [];
+                    var similarities = [];
+                    var searchString = document.getElementById("search").value;
+                    // console.log(searchString);
+                    for (let i in data) {       // album is an integer list index
+                        let similarity = JaroWrinker(searchString, data[i]['name']);
                         let insertIndex = 0;
-                        while (insertIndex < orderedAlbumNames.length && similarity < orderedAlbumNames[insertIndex][1]) {
+                        while (insertIndex < newData.length && similarity < similarities[insertIndex]) {
                             insertIndex++;
                         }
-                        orderedAlbumNames.splice(insertIndex, 0, [name, similarity])
+                        newData.splice(insertIndex, 0, data[i]);
+                        similarities.splice(insertIndex, 0, similarity);
+                    }
+                    // console.log(newData);
+                    // console.log(similarities);
+
+                    clear(document.getElementById("posters"));
+                    var numRows;
+                    if (newData.length > 0) {numRows = Math.floor(newData.length / 4) + 1;}
+                    else {numRows = 0;}
+                    var numColumns = [];
+                    var tracker = newData.length;
+                    let i = 0;
+                    while (i < numRows) {
+                        if (i == numRows - 1) {numColumns.push(tracker); tracker = 0;}
+                        else {numColumns.push(4); tracker = tracker - 4;}
+                        i++;
+                    }
+                    console.log("NumRows: ", numRows);
+                    console.log("NumColumns: ", numColumns);
+
+                    var row = 0;
+                    var posters = document.getElementById('posters');
+                    while (row < numRows) {
+                        var col = 0;
+                        let rowDiv = document.createElement('div'); rowDiv.classList.add('row');
+                        while (col < numColumns[row]) {
+                            let colDiv = document.createElement('div'); colDiv.classList.add('col-md-3', 'text-center');
+                            let h5 = document.createElement('h5'); colDiv.appendChild(h5);
+                            let form = document.createElement('form'); form.method = 'post'; form.action = "{{ url_for('urlSubmit') }}";
+                            form.enctype = "multipart/form-data";
+                            let urlInput = document.createElement('input'); urlInput.type = 'text'; urlInput.name = "SpotifyURL"; urlInput.classList.add('form-control');
+                            urlInput.value = 'https://open.spotify.com/album/'+newData[4*row+col]['file'].replace('.png','')+'?';
+                            urlInput.style.display = "none";
+                            form.appendChild(urlInput);
+                            var inputs = ['coverDim', 'codeDim', 'cornerTextSize', 'artistSize', 'titleSize', 'trackSize', 'maxLabelLength',
+                                'maxArtistsLength', 'maxTitleLength', 'maxTrackLineWidth', 'trackLineSpace', 'maxTracks', 'sCodePos'];
+                            for (let k in inputs) {
+                                let input = document.createElement('input'); input.type='number'; input.name = inputs[k];
+                                input.classList.add('form-control'); input.value = newData[4*row + col]['params'][inputs[k]];
+                                input.style.display = "none";
+                                form.appendChild(input);
+                            }
+
+                            // checkbox time
+                            let checkbox = document.createElement('input'); checkbox.type = 'checkbox';
+                            checkbox.name = "includeFullTitle"; checkbox.classList.add('form-control');
+                            checkbox.style.display = 'none';
+                            if (newData[4*row+col]['params']['includeFullTitle'] == 1) {
+                                checkbox.checked = true;
+                            } else {checkbox.checked = false;}
+                            form.appendChild(checkbox);
+
+                            // image time
+                            let img = document.createElement('img'); img.style.width = '65%';
+                            img.src = "{{ url_for('static', filename = 'PosterStorage/user'+current_user.id | string() + '/' + newData[4*row + col]['file']) }}";
+                            form.appendChild(img);
+                            form.appendChild(document.createElement('br')); form.appendChild(document.createElement('br'));
+                            let btn = document.createElement('button'); btn.classList.add('btn', 'btn-primary'); btn.type = "submit";
+                            btn.innerText = "Go To Generator"; form.appendChild(btn);
+                            colDiv.appendChild(form);
+                            rowDiv.appendChild(colDiv);
+                        }
+                        posters.appendChild(rowDiv);
+                        posters.appendChild(document.createElement('br')); posters.appendChild(document.createElement('br'));
                     }
                 }
             </script>
@@ -139,7 +209,8 @@
                 </div>
             </div>
             <br>
-            {% if posterNames %}
+            <div id="posters">
+            {% if allData %}
             <!-- <table> -->
                 <!-- <tbody> -->
 
@@ -147,48 +218,47 @@
                     <div class="row">
                         {% for j in range(numColumns[i]) %}
                         <div class="col-md-3 text-center">
-                            <h5>{{ albumNames[4*i+j] }}</h5>
+                            <h5>{{ allData[4*i+j]['name'] }}</h5>
                             <form action="{{ url_for('urlSubmit') }}" method="post" enctype="multipart/form-data">
                                 
                                 <input type="text" id="url" name="SpotifyUrl" class="form-control"
-                                value="{{ 'https://open.spotify.com/album/'+posterNames[4*i+j].replace('.png','')+'?' }}" style="display: none;">
+                                value="{{ 'https://open.spotify.com/album/'+allData[4*i+j]['file'].replace('.png','')+'?' }}" style="display: none;">
                                 
                                 <!-- https://open.spotify.com/album/3SpBlxme9WbeQdI9kx7KAV?si=9gofoy4FS-6P6K3GtZdiow -->
 
-
                                 <input type="number" id="1" name="coverDim" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['coverDim'] }}" style="display: none;">
+                                value="{{ allData[4*i+j]['params']['coverDim'] }}" style="display: none;">
                                 <input type="number" id="2" name="codeDim" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['codeDim'] }}" style="display: none;">
+                                value="{{ allData[4*i+j]['params']['codeDim'] }}" style="display: none;">
                                 <input type="number" id="3" name="cornerTextSize" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['cornerTextSize'] }}" style="display: none;">
+                                value="{{ allData[4*i+j]['params']['cornerTextSize'] }}" style="display: none;">
                                 <input type="number" id="4" name="artistSize" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['artistSize'] }}" style="display: none;">
+                                value="{{ allData[4*i+j]['params']['artistSize'] }}" style="display: none;">
                                 <input type="number" id="5" name="titleSize" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['titleSize'] }}" style="display: none;">
+                                value="{{ allData[4*i+j]['params']['titleSize'] }}" style="display: none;">
                                 <input type="number" id="6" name="trackSize" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['trackSize'] }}" style="display: none;">
+                                value="{{ allData[4*i+j]['params']['trackSize'] }}" style="display: none;">
                                 <input type="number" id="7" name="maxLabelLength" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['maxLabelLength'] }}" style="display: none;">
+                                value="{{ allData[4*i+j]['params']['maxLabelLength'] }}" style="display: none;">
                                 <input type="number" id="8" name="maxArtistsLength" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['maxArtistsLength'] }}" style="display: none;">
+                                value="{{ allData[4*i+j]['params']['maxArtistsLength'] }}" style="display: none;">
                                 <input type="number" id="9" name="maxTitleLength" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['maxTitleLength'] }}" style="display: none;">
+                                value="{{ allData[4*i+j]['params']['maxTitleLength'] }}" style="display: none;">
                                 <input type="number" id="10" name="maxTrackLinewidth" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['maxTrackLineWidth'] }}" style="display: none;">
+                                value="{{ allData[4*i+j]['params']['maxTrackLineWidth'] }}" style="display: none;">
                                 <input type="number" id="11" name="trackLineSpace" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['trackLineSpace'] }}" style="display: none;">
+                                value="{{ allData[4*i+j]['params']['trackLineSpace'] }}" style="display: none;">
                                 <input type="number" id="12" name="maxTracks" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['maxTracks'] }}" style="display: none;">
+                                value="{{ allData[4*i+j]['params']['maxTracks'] }}" style="display: none;">
                                 <input type="number" id="13" name="sCodePos" class="form-control"
-                                value="{{ paramDict[posterNames[4*i+j]]['sCodePos'] }}" style="display: none;">
-                                {% if paramDict[posterNames[4*i+j]]['includeFullTitle'] == 1 %}
+                                value="{{ allData[4*i+j]['params']['sCodePos'] }}" style="display: none;">
+                                {% if allData[4*i+j]['params']['includeFullTitle'] == 1 %}
                                 <input type="checkbox" id="14" name="includeFullTitle" class="form-control" style="display: none;" checked>
                                 {% else %}
                                 <input type="checkbox" id="14" name="includeFullTitle" class="form-control" style="display: none;">
                                 {% endif %}
                                 <img style="width: 65%;" 
-                                    src="{{ url_for('static', filename = 'PosterStorage/user'+current_user.id | string() + '/' + posterNames[4*i + j]) }}" alt="">
+                                    src="{{ url_for('static', filename = 'PosterStorage/user'+current_user.id | string() + '/' + allData[4*i+j]['file']) }}" alt="">
                                 <br><br>
                                 <button type="submit" class="btn btn-primary">Go to Generator</button>
                             </form>
@@ -203,7 +273,7 @@
                 <!-- </tbody> -->
             <!-- </table> -->
 
-
+            </div>
 
             {% endif %}
             <br>
