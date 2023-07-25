@@ -187,19 +187,33 @@ def posterHistory():
             tracker -= 4
     # print("Number of columns: ", numColumns)
     albumPlaylistNames: list[str] = []
+    artistNames: list[str] = []
 
     for albumID in posterNames:
         try:
             albumPlaylistNames.append(spotify.album(albumID.replace(".png",""))['name'])
         except:
             albumPlaylistNames.append(spotify.playlist(albumID.replace(".png",""))['name'])
+        
+        try:
+            results = spotify.album(albumID.replace(".png",""))
+            build : str = ''
+            for i in range(len(results['artists'])):
+                # print(results['artists'][i]['name'], end="")
+                build += results['artists'][i]['name']
+                if not i == len(results['artists'])-1:
+                    build += ", "
+            artistNames.append(build)
+        except:
+            artistNames.append(spotify.playlist(albumID.replace(".png",""))['owner']['display_name'])
     # print(albumNames)
 
     bigStruct: list[dict] = [
         {
             "file": posterNames[i],
             "name": albumPlaylistNames[i],
-            "params": paramDict[posterNames[i]]
+            "params": paramDict[posterNames[i]],
+            "artist": artistNames[i]
         }
         for i in range(len(posterNames))
     ]

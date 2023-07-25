@@ -153,8 +153,11 @@
                     var images = document.getElementsByTagName('img');
                     var struct = {};
                     for (let j in images) {
-                        struct[String(images[j].id)] = images[j].src;
+                        if (images[j] != undefined && images[j].id != undefined && images[j].src != undefined) {
+                            struct[String(images[j].id)] = images[j].src;
+                        }
                     }
+                    // console.log(struct);
                     clear(document.getElementById("posters"));
                     var numRows;
                     if (newData.length > 0) {numRows = Math.floor(newData.length / 4) + 1;}
@@ -167,8 +170,8 @@
                         else {numColumns.push(4); tracker = tracker - 4;}
                         i++;
                     }
-                    console.log("NumRows: ", numRows);
-                    console.log("NumColumns: ", numColumns);
+                    // console.log("NumRows: ", numRows);
+                    // console.log("NumColumns: ", numColumns);
 
                     var row = 0;
                     var posters = document.getElementById('posters');
@@ -205,7 +208,103 @@
 
                             // image time
                             let img = document.createElement('img'); img.style.width = '65%';
+                            // console.log("Supposed initiation sequence for undefined call");
                             img.src = struct[newData[4*row + col]['file']];
+                            img.id = newData[4*row + col]['file'];
+                            // console.log("Finished line");
+                            form.appendChild(img);
+                            form.appendChild(document.createElement('br')); form.appendChild(document.createElement('br'));
+                            let btn = document.createElement('button'); btn.classList.add('btn', 'btn-primary'); btn.type = "submit";
+                            btn.innerText = "Go To Generator"; btn.form = newData[4*row+col]['file'].replace('.png',''); form.appendChild(btn);
+                            colDiv.appendChild(form);
+                            rowDiv.appendChild(colDiv);
+                            col++;
+                        }
+                        posters.appendChild(rowDiv);
+                        posters.appendChild(document.createElement('br')); posters.appendChild(document.createElement('br'));
+                        row++;
+                    }
+                }
+                function reorderArtists() {
+                    var data = JSON.parse('{{ allData | tojson }}');
+                    var newData = [];
+                    var similarities = [];
+                    var searchString = document.getElementById("search2").value;
+                    // console.log(searchString);
+                    for (let i in data) {       // album is an integer list index
+                        let similarity = JaroWrinker(searchString, data[i]['artist']);
+                        let insertIndex = 0;
+                        while (insertIndex < newData.length && similarity < similarities[insertIndex]) {
+                            insertIndex++;
+                        }
+                        newData.splice(insertIndex, 0, data[i]);
+                        similarities.splice(insertIndex, 0, similarity);
+                    }
+                    console.log(newData);
+                    console.log(similarities);
+                    
+                    var images = document.getElementsByTagName('img');
+                    var struct = {};
+                    for (let j in images) {
+                        if (images[j] != undefined && images[j].id != undefined && images[j].src != undefined) {
+                            struct[String(images[j].id)] = images[j].src;
+                        }
+                    }
+                    // console.log(struct);
+                    clear(document.getElementById("posters"));
+                    var numRows;
+                    if (newData.length > 0) {numRows = Math.floor(newData.length / 4) + 1;}
+                    else {numRows = 0;}
+                    var numColumns = [];
+                    var tracker = newData.length;
+                    let i = 0;
+                    while (i < numRows) {
+                        if (i == numRows - 1) {numColumns.push(tracker); tracker = 0;}
+                        else {numColumns.push(4); tracker = tracker - 4;}
+                        i++;
+                    }
+                    // console.log("NumRows: ", numRows);
+                    // console.log("NumColumns: ", numColumns);
+
+                    var row = 0;
+                    var posters = document.getElementById('posters');
+                    while (row < numRows) {
+                        var col = 0;
+                        let rowDiv = document.createElement('div'); rowDiv.classList.add('row');
+                        while (col < numColumns[row]) {
+                            let colDiv = document.createElement('div'); colDiv.classList.add('col-md-3', 'text-center');
+                            let h5 = document.createElement('h5'); h5.innerText = newData[4*row+col]['name']; colDiv.appendChild(h5);
+                            let form = document.createElement('form'); form.method = 'post'; form.action = "{{ url_for('urlSubmit') }}";
+                            form.enctype = "multipart/form-data"; form.id = newData[4*row+col]['file'].replace('.png','');
+                            let urlInput = document.createElement('input'); urlInput.type = 'text'; urlInput.name = "SpotifyUrl"; urlInput.classList.add('form-control');
+                            urlInput.value = 'https://open.spotify.com/album/'+newData[4*row+col]['file'].replace('.png','')+'?';
+                            urlInput.style.display = "none"; urlInput.form = newData[4*row+col]['file'].replace('.png','');
+                            form.appendChild(urlInput);
+                            var inputs = ['coverDim', 'codeDim', 'cornerTextSize', 'artistSize', 'titleSize', 'trackSize', 'maxLabelLength',
+                                'maxArtistsLength', 'maxTitleLength', 'maxTrackLineWidth', 'trackLineSpace', 'maxTracks', 'sCodePos'];
+                            for (let k in inputs) {
+                                let input = document.createElement('input'); input.type='number'; input.name = inputs[k];
+                                input.classList.add('form-control'); input.value = newData[4*row + col]['params'][inputs[k]];
+                                input.style.display = "none"; input.form = newData[4*row+col]['file'].replace('.png','');
+                                form.appendChild(input);
+                            }
+
+                            // checkbox time
+                            let checkbox = document.createElement('input'); checkbox.type = 'checkbox';
+                            checkbox.name = "includeFullTitle"; checkbox.classList.add('form-control');
+                            checkbox.style.display = 'none';
+                            if (newData[4*row+col]['params']['includeFullTitle'] == 1) {
+                                checkbox.checked = true;
+                            } else {checkbox.checked = false;}
+                            checkbox.form = newData[4*row+col]['file'].replace('.png','');
+                            form.appendChild(checkbox);
+
+                            // image time
+                            let img = document.createElement('img'); img.style.width = '65%';
+                            // console.log("Supposed initiation sequence for undefined call");
+                            img.src = struct[newData[4*row + col]['file']];
+                            img.id = newData[4*row + col]['file'];
+                            // console.log("Finished line");
                             form.appendChild(img);
                             form.appendChild(document.createElement('br')); form.appendChild(document.createElement('br'));
                             let btn = document.createElement('button'); btn.classList.add('btn', 'btn-primary'); btn.type = "submit";
@@ -224,153 +323,69 @@
             <!-- use jinja filters and pass one big array of json objects in from app.py to get this to work -->
 
             <div class="row">
-                <div class="col-md-3 text-left">
-                    <input type="text" id="search" placeholder="Album Search" class="form-control" onchange="reorderAlbums()"> 
+                <div class="col-md-4 text-left">
+                    <input type="text" id="search" placeholder="Album Name Search" class="form-control" onchange="reorderAlbums()"> 
+                </div>
+                <div class="col-md-4 text-left">
+                    <input type="text" id="search2" placeholder="Artist Name Search" class="form-control" onchange="reorderArtists()">
                 </div>
             </div>
             <br>
             <div id="posters">
             {% if allData %}
-
-                <script>
-                    // function reorderAlbums() {
-                        var newData = JSON.parse('{{ allData | tojson }}');
-                        // var images = document.getElementsByTagName('img');
-                        // var struct = {};
-                        // {% for asdf in range(numPosters) %}
-                        //     struct[String(images[j].id)] = "{{ url_for }}";
-                        // {% endfor %}
-                        clear(document.getElementById("posters"));
-                        var numRows;
-                        if (newData.length > 0) {numRows = Math.floor(newData.length / 4) + 1;}
-                        else {numRows = 0;}
-                        var numColumns = [];
-                        var tracker = newData.length;
-                        let i = 0;
-                        while (i < numRows) {
-                            if (i == numRows - 1) {numColumns.push(tracker); tracker = 0;}
-                            else {numColumns.push(4); tracker = tracker - 4;}
-                            i++;
-                        }
-                        console.log("NumRows: ", numRows);
-                        console.log("NumColumns: ", numColumns);
-
-                        var row = 0;
-                        var posters = document.getElementById('posters');
-                        while (row < numRows) {
-                            var col = 0;
-                            let rowDiv = document.createElement('div'); rowDiv.classList.add('row');
-                            while (col < numColumns[row]) {
-                                let colDiv = document.createElement('div'); colDiv.classList.add('col-md-3', 'text-center');
-                                let h5 = document.createElement('h5'); h5.innerText = newData[4*row+col]['name']; colDiv.appendChild(h5);
-                                let form = document.createElement('form'); form.method = 'post'; form.action = "{{ url_for('urlSubmit') }}";
-                                form.enctype = "multipart/form-data"; form.id = newData[4*row+col]['file'].replace('.png','');
-                                let urlInput = document.createElement('input'); urlInput.type = 'text'; urlInput.name = "SpotifyUrl"; urlInput.classList.add('form-control');
-                                urlInput.value = 'https://open.spotify.com/album/'+newData[4*row+col]['file'].replace('.png','')+'?';
-                                urlInput.style.display = "none"; urlInput.form = newData[4*row+col]['file'].replace('.png','');
-                                form.appendChild(urlInput);
-                                var inputs = ['coverDim', 'codeDim', 'cornerTextSize', 'artistSize', 'titleSize', 'trackSize', 'maxLabelLength',
-                                    'maxArtistsLength', 'maxTitleLength', 'maxTrackLineWidth', 'trackLineSpace', 'maxTracks', 'sCodePos'];
-                                for (let k in inputs) {
-                                    let input = document.createElement('input'); input.type='number'; input.name = inputs[k];
-                                    input.classList.add('form-control'); input.value = newData[4*row + col]['params'][inputs[k]];
-                                    input.style.display = "none"; input.form = newData[4*row+col]['file'].replace('.png','');
-                                    form.appendChild(input);
-                                }
-
-                                // checkbox time
-                                let checkbox = document.createElement('input'); checkbox.type = 'checkbox';
-                                checkbox.name = "includeFullTitle"; checkbox.classList.add('form-control');
-                                checkbox.style.display = 'none';
-                                if (newData[4*row+col]['params']['includeFullTitle'] == 1) {
-                                    checkbox.checked = true;
-                                } else {checkbox.checked = false;}
-                                checkbox.form = newData[4*row+col]['file'].replace('.png','');
-                                form.appendChild(checkbox);
-
-                                // image time
-                                let img = document.createElement('img'); img.style.width = '65%';
-                                img.src = "{{ url_for('static', filename = 'PosterStorage/user'+current_user.id | string() + '/' + allData[4*i+j]['file']) }}";
-                                img.id = "{{ allData[4*i+j]['file'] }}";
-                                form.appendChild(img);
-                                form.appendChild(document.createElement('br')); form.appendChild(document.createElement('br'));
-                                let btn = document.createElement('button'); btn.classList.add('btn', 'btn-primary'); btn.type = "submit";
-                                btn.innerText = "Go To Generator"; btn.form = newData[4*row+col]['file'].replace('.png',''); form.appendChild(btn);
-                                colDiv.appendChild(form);
-                                rowDiv.appendChild(colDiv);
-                                col++;
-                            }
-                            posters.appendChild(rowDiv);
-                            posters.appendChild(document.createElement('br')); posters.appendChild(document.createElement('br'));
-                            row++;
-                        }
-                    // }
-                </script>
-
-            <!-- <table> -->
-                <!-- <tbody> -->
-
-                    {% for i in range(numRows) %}
-                    <div class="row">
-                        {% for j in range(numColumns[i]) %}
-                        <div class="col-md-3 text-center">
-                            <h5>{{ allData[4*i+j]['name'] }}</h5>
-                            <form action="{{ url_for('urlSubmit') }}" method="post" enctype="multipart/form-data" id="234">
-                                
-                                <input type="text" id="url" name="SpotifyUrl" class="form-control"
-                                value="{{ 'https://open.spotify.com/album/'+allData[4*i+j]['file'].replace('.png','')+'?' }}" style="display: none;" form="234">
-                                
-                                <!-- https://open.spotify.com/album/3SpBlxme9WbeQdI9kx7KAV?si=9gofoy4FS-6P6K3GtZdiow -->
-
-                                <input type="number" id="coverDim" name="coverDim" class="form-control"
-                                value="{{ allData[4*i+j]['params']['coverDim'] }}" style="display: none;">
-                                <input type="number" id="codeDim" name="codeDim" class="form-control"
-                                value="{{ allData[4*i+j]['params']['codeDim'] }}" style="display: none;">
-                                <input type="number" id="cornerTextSize" name="cornerTextSize" class="form-control"
-                                value="{{ allData[4*i+j]['params']['cornerTextSize'] }}" style="display: none;">
-                                <input type="number" id="artistSize" name="artistSize" class="form-control"
-                                value="{{ allData[4*i+j]['params']['artistSize'] }}" style="display: none;">
-                                <input type="number" id="titleSize" name="titleSize" class="form-control"
-                                value="{{ allData[4*i+j]['params']['titleSize'] }}" style="display: none;">
-                                <input type="number" id="trackSize" name="trackSize" class="form-control"
-                                value="{{ allData[4*i+j]['params']['trackSize'] }}" style="display: none;">
-                                <input type="number" id="maxLabelLength" name="maxLabelLength" class="form-control"
-                                value="{{ allData[4*i+j]['params']['maxLabelLength'] }}" style="display: none;">
-                                <input type="number" id="maxArtistsLength" name="maxArtistsLength" class="form-control"
-                                value="{{ allData[4*i+j]['params']['maxArtistsLength'] }}" style="display: none;">
-                                <input type="number" id="maxTitleLength" name="maxTitleLength" class="form-control"
-                                value="{{ allData[4*i+j]['params']['maxTitleLength'] }}" style="display: none;">
-                                <input type="number" id="maxTrackLinewidth" name="maxTrackLinewidth" class="form-control"
-                                value="{{ allData[4*i+j]['params']['maxTrackLineWidth'] }}" style="display: none;">
-                                <input type="number" id="trackLineSpace" name="trackLineSpace" class="form-control"
-                                value="{{ allData[4*i+j]['params']['trackLineSpace'] }}" style="display: none;">
-                                <input type="number" id="maxTracks" name="maxTracks" class="form-control"
-                                value="{{ allData[4*i+j]['params']['maxTracks'] }}" style="display: none;">
-                                <input type="number" id="sCodePos" name="sCodePos" class="form-control"
-                                value="{{ allData[4*i+j]['params']['sCodePos'] }}" style="display: none;">
-                                {% if allData[4*i+j]['params']['includeFullTitle'] == 1 %}
-                                <input type="checkbox" id="includeFullTitle" name="includeFullTitle" class="form-control" style="display: none;" checked>
-                                {% else %}
-                                <input type="checkbox" id="includeFullTitle" name="includeFullTitle" class="form-control" style="display: none;">
-                                {% endif %}
-                                <img style="width: 65%;" 
-                                    src="{{ url_for('static', filename = 'PosterStorage/user'+current_user.id | string() + '/' + allData[4*i+j]['file']) }}" alt="" id="{{ allData[4*i+j]['file'] }}">
-                                <br><br>
-                                <button type="submit" class="btn btn-primary">Go to Generator</button>
-                            </form>
-                            <!-- Album name and thumbnail -->
+                {% for i in range(numRows) %}
+                <div class="row">
+                    {% for j in range(numColumns[i]) %}
+                    <div class="col-md-3 text-center">
+                        <h5>{{ allData[4*i+j]['name'] }}</h5>
+                        <form action="{{ url_for('urlSubmit') }}" method="post" enctype="multipart/form-data" id="234">
                             
-                        </div>
-                        {% endfor %}
+                            <input type="text" id="url" name="SpotifyUrl" class="form-control"
+                            value="{{ 'https://open.spotify.com/album/'+allData[4*i+j]['file'].replace('.png','')+'?' }}" style="display: none;" form="234">
+                        
+                            <input type="number" id="coverDim" name="coverDim" class="form-control"
+                            value="{{ allData[4*i+j]['params']['coverDim'] }}" style="display: none;">
+                            <input type="number" id="codeDim" name="codeDim" class="form-control"
+                            value="{{ allData[4*i+j]['params']['codeDim'] }}" style="display: none;">
+                            <input type="number" id="cornerTextSize" name="cornerTextSize" class="form-control"
+                            value="{{ allData[4*i+j]['params']['cornerTextSize'] }}" style="display: none;">
+                            <input type="number" id="artistSize" name="artistSize" class="form-control"
+                            value="{{ allData[4*i+j]['params']['artistSize'] }}" style="display: none;">
+                            <input type="number" id="titleSize" name="titleSize" class="form-control"
+                            value="{{ allData[4*i+j]['params']['titleSize'] }}" style="display: none;">
+                            <input type="number" id="trackSize" name="trackSize" class="form-control"
+                            value="{{ allData[4*i+j]['params']['trackSize'] }}" style="display: none;">
+                            <input type="number" id="maxLabelLength" name="maxLabelLength" class="form-control"
+                            value="{{ allData[4*i+j]['params']['maxLabelLength'] }}" style="display: none;">
+                            <input type="number" id="maxArtistsLength" name="maxArtistsLength" class="form-control"
+                            value="{{ allData[4*i+j]['params']['maxArtistsLength'] }}" style="display: none;">
+                            <input type="number" id="maxTitleLength" name="maxTitleLength" class="form-control"
+                            value="{{ allData[4*i+j]['params']['maxTitleLength'] }}" style="display: none;">
+                            <input type="number" id="maxTrackLinewidth" name="maxTrackLinewidth" class="form-control"
+                            value="{{ allData[4*i+j]['params']['maxTrackLineWidth'] }}" style="display: none;">
+                            <input type="number" id="trackLineSpace" name="trackLineSpace" class="form-control"
+                            value="{{ allData[4*i+j]['params']['trackLineSpace'] }}" style="display: none;">
+                            <input type="number" id="maxTracks" name="maxTracks" class="form-control"
+                            value="{{ allData[4*i+j]['params']['maxTracks'] }}" style="display: none;">
+                            <input type="number" id="sCodePos" name="sCodePos" class="form-control"
+                            value="{{ allData[4*i+j]['params']['sCodePos'] }}" style="display: none;">
+                            {% if allData[4*i+j]['params']['includeFullTitle'] == 1 %}
+                            <input type="checkbox" id="includeFullTitle" name="includeFullTitle" class="form-control" style="display: none;" checked>
+                            {% else %}
+                            <input type="checkbox" id="includeFullTitle" name="includeFullTitle" class="form-control" style="display: none;">
+                            {% endif %}
+                            <img style="width: 65%;" 
+                                src="{{ url_for('static', filename = 'PosterStorage/user'+current_user.id | string() + '/' + allData[4*i+j]['file']) }}" alt="" id="{{ allData[4*i+j]['file'] }}">
+                            <br><br>
+                            <button type="submit" class="btn btn-primary">Go to Generator</button>
+                        </form>
                     </div>
-                    <br>
-                    <br>
                     {% endfor %}
-                <!-- </tbody> -->
-            <!-- </table> -->
-
+                </div>
+                <br>
+                <br>
+                {% endfor %}
             </div>
-
             {% endif %}
             <br>
         </div>
