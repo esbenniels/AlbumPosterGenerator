@@ -49,7 +49,6 @@ class ProgressBar(Bar):
 def handleURL(url: str, params: dict[str, int] = defaultParams, saveFolder: str = "", colors: list[tuple[int, int, int]] = None):
     global bar, startTime
     bar = ProgressBar(max=9)
-    startTime = datetime.now()
     if "album" in url:
         return createAlbumPoster(url, params, saveFolder, colors)
     elif "playlist" in url:
@@ -365,7 +364,6 @@ def writePlaylistText(draw: ImageDraw, details: dict):
         for j in range(len(parts)):
             draw.text((1250, 1435 + (j*82)), f"{parts[j]}", (0,0,0), font=titleFont, anchor='rt')
     
-
 def writeTracks(draw: ImageDraw, details: dict):
     trackFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['trackSize'])
     trackList: list[str] = [song['name'].upper() for song in details['tracks']]
@@ -506,6 +504,7 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
     with open(f"static/PosterStorage{saveFolder}/data.json", 'r+') as handle:
         data: dict = json.load(handle)
         data[details['id']] = params
+        data[details['id']]['lastModified'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         handle.close()
     with open(f"static/PosterStorage{saveFolder}/data.json", 'w+') as handle:
         json.dump(data, handle)
@@ -583,6 +582,7 @@ def createPlaylistPoster(url: str, params: dict[str, int] = defaultParams, saveF
     with open(f"static/PosterStorage{saveFolder}/data.json", 'r+') as handle:
         data: dict = json.load(handle)
         data[details['id']] = params
+        data[details['id']]['lastModified'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         handle.close()
     with open(f"static/PosterStorage{saveFolder}/data.json", 'w+') as handle:
         json.dump(data, handle)

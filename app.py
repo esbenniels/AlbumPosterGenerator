@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os, re, json
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+import datetime
 
 os.environ['SPOTIPY_CLIENT_ID'] = '56c47550643e42b9a6ab2aa821fe394c'
 os.environ['SPOTIPY_CLIENT_SECRET'] = '0f26f4b32912427ca59b7c62d8c36b5a'
@@ -207,16 +208,21 @@ def posterHistory():
         except:
             artistNames.append(spotify.playlist(albumID.replace(".png",""))['owner']['display_name'])
     # print(albumNames)
+    with open(f"static/PosterStorage/user{current_user.id}/data.json", 'r+') as handle:
+        data: dict = json.load(handle)
+        bigStruct: list[dict] = [
+            {
+                "file": posterNames[i],
+                "name": albumPlaylistNames[i],
+                "params": paramDict[posterNames[i]],
+                "artist": artistNames[i],
+                "lastModified": data[posterNames[i].replace(".png","")]['lastModified']
+            }
+            for i in range(len(posterNames))
+        ]
+        handle.close()
 
-    bigStruct: list[dict] = [
-        {
-            "file": posterNames[i],
-            "name": albumPlaylistNames[i],
-            "params": paramDict[posterNames[i]],
-            "artist": artistNames[i]
-        }
-        for i in range(len(posterNames))
-    ]
+    bigStruct = sorted(bigStruct, key = lambda block: datetime.datetime.strptime(block['lastModified'], "%Y-%m-%d %H:%M:%S"), reverse=True)
 
     return render_template("posters.html",
                         #    posterNames = posterNames,
