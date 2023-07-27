@@ -109,6 +109,36 @@
             }
             return weight;
         };
+
+        function ratcliffObershelp(s1, s2) {
+            // Return 0 if either string is empty
+            if (s1.length === 0 || s2.length === 0) {
+                return 0;
+            }
+
+            // Compute the Longest Common Subsequence (LCS) matrix
+            const lcsMatrix = new Array(s1.length + 1).fill(null).map(() => new Array(s2.length + 1).fill(0));
+
+            for (let i = 1; i <= s1.length; i++) {
+                for (let j = 1; j <= s2.length; j++) {
+                    if (s1[i - 1] === s2[j - 1]) {
+                        lcsMatrix[i][j] = lcsMatrix[i - 1][j - 1] + 1;
+                    } else {
+                        lcsMatrix[i][j] = Math.max(lcsMatrix[i][j - 1], lcsMatrix[i - 1][j]);
+                    }
+                }
+            }
+
+            // Compute the length of the LCS (Longest Common Subsequence)
+            const lcsLength = lcsMatrix[s1.length][s2.length];
+
+            // Compute the similarity score using Ratcliff/Obershelp formula
+            const similarity = (2.0 * lcsLength) / (s1.length + s2.length);
+
+            return similarity;
+        }
+
+
     </script>
     
 
@@ -212,34 +242,21 @@
                     }
                 }
 
-                function reorderAlbums() {
+                function reorderAlbums(prop, elementId) {
                     var data = JSON.parse('{{ allData | tojson }}');
                     var newData = [];
                     var similarities = [];
-                    var searchString = document.getElementById("search").value;
+                    var searchString = document.getElementById(elementId).value.toLowerCase();
                     // console.log(searchString);
                     for (let i in data) {       // album is an integer list index
-                        let similarity = JaroWrinker(searchString, data[i]['name']);
-                        let insertIndex = 0;
-                        while (insertIndex < newData.length && similarity < similarities[insertIndex]) {
-                            insertIndex++;
+                        let similarity = 0;
+                        if (searchString.length > data[i][prop].length) {
+                            similarity = ratcliffObershelp(searchString.substring(0, data[i][prop].length), data[i][prop].toLowerCase());
+                            // console.log(searchString.substring(0, data[i][prop].length), " vs ", data[i][prop].toLowerCase(), " = ", similarity);
+                        } else {
+                            similarity = ratcliffObershelp(searchString, data[i][prop].substring(0, searchString.length).toLowerCase());
+                            // console.log(searchString, " vs ", data[i][prop].substring(0, searchString.length).toLowerCase(), " = ", similarity);
                         }
-                        newData.splice(insertIndex, 0, data[i]);
-                        similarities.splice(insertIndex, 0, similarity);
-                    }
-                    // console.log(newData);
-                    // console.log(similarities);
-                    
-                    remakePosters(newData);
-                }
-                function reorderArtists() {
-                    var data = JSON.parse('{{ allData | tojson }}');
-                    var newData = [];
-                    var similarities = [];
-                    var searchString = document.getElementById("search2").value;
-                    // console.log(searchString);
-                    for (let i in data) {       // album is an integer list index
-                        let similarity = JaroWrinker(searchString, data[i]['artist']);
                         let insertIndex = 0;
                         while (insertIndex < newData.length && similarity < similarities[insertIndex]) {
                             insertIndex++;
@@ -294,10 +311,10 @@
 
             <div class="row">
                 <div class="col-md-4 text-left">
-                    <input type="text" id="search" placeholder="Album Name Search" class="form-control" onchange="reorderAlbums()"> 
+                    <input type="text" id="search" placeholder="Album Name Search" class="form-control" onchange="reorderAlbums('name', 'search')"> 
                 </div>
                 <div class="col-md-4 text-left">
-                    <input type="text" id="search2" placeholder="Artist Name Search" class="form-control" onchange="reorderArtists()">
+                    <input type="text" id="search2" placeholder="Artist Name Search" class="form-control" onchange="reorderAlbums('artist', 'search2')">
                 </div>
                 <div class="col-md-4 text-right">
                     <button onclick="sortDate()" class="btn" id="sort" sorting = 'true'>
