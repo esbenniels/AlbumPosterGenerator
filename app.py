@@ -84,7 +84,7 @@ app = create_app()
 @app.route("/index", methods=['POST', 'GET'])
 @login_required
 def index():
-    return render_template("index.html", current_user = current_user, defaultParams=defaultParams)
+    return render_template("index.html", current_user = current_user, defaultParams=defaultParams, dp = defaultParams)
 
 @app.route("/urlSubmit", methods=['POST', 'GET'])
 @login_required
@@ -102,12 +102,12 @@ def urlSubmit():
             except:
                 print("regex fail")
                 flash("REDInvalid Spotify album URL. Try copying the link from Spotify's share options")
-                return render_template("index.html", current_user=current_user, defaultParams = defaultParams)
+                return render_template("index.html", current_user=current_user, defaultParams = defaultParams, dp = defaultParams)
 
         if len(albumID) != 22:
             print("idLength fail")
             flash("REDInvalid Spotify album URL. Try copying the link from Spotify's share options.")
-            return render_template("index.html", current_user=current_user, defaultParams = defaultParams)
+            return render_template("index.html", current_user=current_user, defaultParams = defaultParams, dp = defaultParams)
 
         try:
             results = spotify.album(albumID)
@@ -116,7 +116,7 @@ def urlSubmit():
                 results = spotify.playlist(albumID)
             except:
                 flash("REDError retrieving Spotify Album. Check URL")
-                return render_template("index.html", current_user=current_user, defaultParams = defaultParams)
+                return render_template("index.html", current_user=current_user, defaultParams = defaultParams, dp = defaultParams)
         
         newParams = {}
         for field in defaultParams:
@@ -157,7 +157,8 @@ def urlSubmit():
         return render_template("index.html", current_user = current_user, 
                                posterPath = "PosterStorage/user"+str(current_user.id)+f"/poster.png",
                                defaultParams = newParams,
-                               lastAlbum = url)
+                               lastAlbum = url, 
+                               dp = defaultParams)
 
 @app.route("/posterHistory", methods=['POST', 'GET'])
 @login_required

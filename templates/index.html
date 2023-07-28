@@ -93,6 +93,33 @@
                             <input type="checkbox" id="fullTitle" name="includeFullTitle">
                         {% endif %}
                     </div>
+                    {% if defaultParams %}
+                    <div class="col-md-3">
+                        
+                            <script>
+                                function restoreDefaults() {
+                                    if ({{ dp['includeFullTitle'] }}) {
+                                        document.getElementById("fullTitle").checked = true;
+                                    } else { document.getElementById("fullTitle").checked = false;}
+                                    document.getElementById('2').value = "{{ dp['coverDim'] }}";
+                                    document.getElementById('3').value = "{{ dp['codeDim'] }}";
+                                    document.getElementById('1').value = "{{ dp['sCodePos'] }}";
+                                    document.getElementById('5').value = "{{ dp['artistSize'] }}";
+                                    document.getElementById('6').value = "{{ dp['titleSize'] }}";
+                                    document.getElementById('4').value = "{{ dp['cornerTextSize'] }}";
+                                    document.getElementById('9').value = "{{ dp['maxArtistsLength'] }}";
+                                    document.getElementById('10').value = "{{ dp['maxTitleLength'] }}";
+                                    document.getElementById('8').value = "{{ dp['maxLabelLength'] }}";
+                                    document.getElementById('7').value = "{{ dp['trackSize'] }}";
+                                    document.getElementById('11').value = "{{ dp['maxTrackLineWidth'] }}";
+                                    document.getElementById('12').value = "{{ dp['trackLineSpace'] }}";
+                                    document.getElementById('13').value = "{{ dp['maxTracks'] }}";
+                                    
+                                }
+                            </script>
+                            <button class="btn btn-primary" onclick="restoreDefaults()"><label for="">Restore Default Parameters</label></button>
+                    </div>
+                    {% endif %}
                 </div>
                 <br>
                 <div class="row">
