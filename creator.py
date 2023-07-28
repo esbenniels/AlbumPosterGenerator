@@ -110,18 +110,41 @@ def getPlaylistDetails(url:str) -> dict:
     spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
     results = spotify.playlist(playlistID[0])
+    tracks: list = spotify.playlist_tracks(playlistID[0], fields = None, limit=100, offset=0)['items']
+    # print("Number of tracks from playlist_tracks: ", len(tracks['items']))
+    # print(tracks)
+    i = 1
+    while len(tracks) % 100 == 0:
+        newTracks = spotify.playlist_tracks(playlistID[0], fields = None, limit=100, offset=i*100)['items']
+        tracks += newTracks
+        i += 1
 
-    totalDuration = sum([song['track']['duration_ms'] for song in results['tracks']['items']])
+
+    totalDuration = sum([song['track']['duration_ms'] for song in tracks])
+
+    artistDict: dict=  {}
 
     trackStruct : list[dict] = [
         {
             "href": song['track']['href'],
             "name": song['track']['name'],
             "id": song['track']['id'],
-            "duration": song['track']['duration_ms']
+            "duration": song['track']['duration_ms'],
+            "artists": [artist['name'] for artist in song['track']['artists']]
         }
-        for song in results['tracks']['items']
+        for song in tracks
     ]
+
+    for song in trackStruct:
+        for artist in song['artists']:
+            if artist in artistDict:
+                artistDict[artist] += 1
+            else:
+                artistDict[artist] = 1
+
+    sortArtists = sorted(artistDict.items(), key=lambda pair: pair[1], reverse=True)
+    print("Total Tracks: ", len(trackStruct))
+    print("Top Artists: ", sortArtists[:min(3, len(sortArtists))])
 
     return {
         "id": playlistID[0],
@@ -130,7 +153,8 @@ def getPlaylistDetails(url:str) -> dict:
         'description': results['description'],
         'length': totalDuration,
         'coverURL': results['images'][0]['url'],
-        'tracks': trackStruct
+        'tracks': trackStruct,
+        'topArtists': sortArtists[:min(3, len(sortArtists))]
     }
 
 def getTopColors(sType: str = "album") -> list[list[int]]:
@@ -282,11 +306,16 @@ def writePlaylistText(draw: ImageDraw, details: dict):
     boldText = ImageFont.truetype('SourceSans3-ExtraBold.ttf', defaultParams['cornerTextSize'])
     artistFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['artistSize'])
     titleFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['titleSize'])
-    # if len(details['label'].upper()) <= defaultParams['maxLabelLength']:
-    #     draw.text((83,1858), f"LABEL: {details['label'].upper()}", (0,0,0), font=boldText, anchor='lt')
-    # else:
-    #     draw.text((83,1858), f"LABEL: {details['label'].upper()[:defaultParams['maxLabelLength']]+'...'}", (0,0,0), font=boldText, anchor='lt')
-    draw.text((83,1858), f"PLAYLIST LENGTH: {getLength(details['tracks'])}", (0,0,0), font=boldText, anchor='lt')
+
+    topArtistsString = details['topArtists'][0][0]
+    for i in range(1, len(details['topArtists'])):
+        topArtistsString += ", "+details['topArtists'][i][0].upper()
+
+    if len(topArtistsString.upper()) <= defaultParams['maxLabelLength']:
+        draw.text((83,1858), f"TOP ARTISTS: {topArtistsString.upper()}", (0,0,0), font=boldText, anchor='lt')
+    else:
+        draw.text((83,1858), f"TOP ARTISTS: {topArtistsString.upper()[:defaultParams['maxLabelLength']]+'...'}", (0,0,0), font=boldText, anchor='lt')
+    draw.text((83,1894), f"PLAYLIST LENGTH: {getLength(details['tracks'])}", (0,0,0), font=boldText, anchor='lt')
 
     # Writing description
 
@@ -505,6 +534,7 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
         data: dict = json.load(handle)
         data[details['id']] = params
         data[details['id']]['lastModified'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data[details['id']]['type'] = "album"
         handle.close()
     with open(f"static/PosterStorage{saveFolder}/data.json", 'w+') as handle:
         json.dump(data, handle)
@@ -583,6 +613,7 @@ def createPlaylistPoster(url: str, params: dict[str, int] = defaultParams, saveF
         data: dict = json.load(handle)
         data[details['id']] = params
         data[details['id']]['lastModified'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data[details['id']]['type'] = "playlist"
         handle.close()
     with open(f"static/PosterStorage{saveFolder}/data.json", 'w+') as handle:
         json.dump(data, handle)

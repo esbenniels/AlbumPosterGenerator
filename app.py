@@ -17,7 +17,6 @@ spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
 
 db = SQLAlchemy()
 
-
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True)
@@ -43,6 +42,7 @@ class Album(db.Model):
     b5 = db.Column(db.Integer)
 
 
+
 def create_app():
     app = Flask(__name__)
     CORS(app)
@@ -61,7 +61,8 @@ def create_app():
     @login_manager.user_loader
     def load_user(user_id):
         # since the user_id is just the primary key of our user table, use it in the query for the user
-        return User.query.get(int(user_id))
+        return db.session.get(User, int(user_id))
+    # User.query.get(int(user_id))
 
     # # blueprint for auth routes in our app
     # from auth import auth as auth_blueprint
@@ -92,7 +93,7 @@ def urlSubmit():
         return redirect(url_for('index'))
     else:
         url = request.form.get('SpotifyUrl')
-
+        print(url)
         try:
             albumID = re.findall('album/(.*)\?', url)[0]
         except:
@@ -133,7 +134,8 @@ def urlSubmit():
 
         # print("Passing Parameters: ", newParams)
 
-        a = Album.query.filter_by(id = albumID).first()
+        a = db.session.get(Album, albumID)
+        # Album.query.filter_by(id = albumID).first()
         if a:
             colors = [[a.r1, a.g1, a.b1],[a.r2, a.g2, a.b2],[a.r3, a.g3, a.b3],[a.r4, a.g4, a.b4],[a.r5, a.g5, a.b5]]
             handleURL(url, newParams, "/user"+str(current_user.id), colors)
@@ -192,21 +194,21 @@ def posterHistory():
 
     for albumID in posterNames:
         try:
-            albumPlaylistNames.append(spotify.album(albumID.replace(".png",""))['name'])
-        except:
-            albumPlaylistNames.append(spotify.playlist(albumID.replace(".png",""))['name'])
-        
-        try:
-            results = spotify.album(albumID.replace(".png",""))
+            res = spotify.album(albumID.replace(".png",""))
+            albumPlaylistNames.append(res['name'])
+            # results = spotify.album(albumID.replace(".png",""))
             build : str = ''
-            for i in range(len(results['artists'])):
+            for i in range(len(res['artists'])):
                 # print(results['artists'][i]['name'], end="")
-                build += results['artists'][i]['name']
-                if not i == len(results['artists'])-1:
+                build += res['artists'][i]['name']
+                if not i == len(res['artists'])-1:
                     build += ", "
             artistNames.append(build)
         except:
-            artistNames.append(spotify.playlist(albumID.replace(".png",""))['owner']['display_name'])
+            res = spotify.playlist(albumID.replace(".png",""))
+            albumPlaylistNames.append(res['name'])
+            artistNames.append(res['owner']['display_name'])
+            
     # print(albumNames)
     with open(f"static/PosterStorage/user{current_user.id}/data.json", 'r+') as handle:
         data: dict = json.load(handle)
@@ -216,7 +218,8 @@ def posterHistory():
                 "name": albumPlaylistNames[i],
                 "params": paramDict[posterNames[i]],
                 "artist": artistNames[i],
-                "lastModified": data[posterNames[i].replace(".png","")]['lastModified']
+                "lastModified": data[posterNames[i].replace(".png","")]['lastModified'],
+                "type": data[posterNames[i].replace(".png","")]['type']
             }
             for i in range(len(posterNames))
         ]
@@ -246,7 +249,7 @@ def loginPost():
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
 
-    user = User.query.filter_by(email=email).first()
+    user = db.session.query(User).filter(User.email == email).first()
 
     # check if the user actually exists
     # take the user-supplied password, hash it, and compare it to the hashed password in the database
@@ -271,20 +274,14 @@ def signupPost():
     # name = request.form.get('name')
     password = request.form.get('password')
 
-    user = User.query.filter_by(email=email).first() # if this returns a user, then the email already exists in database
+    user = db.session.query(User).filter(User.email == email).first() # if this returns a user, then the email already exists in database
 
     if user: # if a user is found, we want to redirect back to signup page so user can try again
         flash("REDEmail address already exists")
         return render_template("signup.html")
 
-    engine = db.get_engine().connect()
-    result = engine.exec_driver_sql("""SELECT id FROM user;""")
-    ids = []
-    for row in result:
-        print(row)
-        ids.append(row[0])
-    print(ids)
-    ids = list(int(id) for id in ids)
+    ids = db.session.query(User.id).all()
+    ids = [id[0] for id in ids]
     if len(ids) == 0:
         max_id = 0
     else:
@@ -306,7 +303,7 @@ def signupPost():
     db.session.add(new_user)
     db.session.commit()
 
-    user = User.query.filter_by(email=email).first()
+    user = db.session.query(User).filter(User.email == email).first()
     login_user(user)
     return redirect(url_for('index'))
 
