@@ -14,7 +14,7 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 21:10:41",
+        "lastModified": "2023-07-28 21:29:32",
         "type": "album",
         "name": "Continuum",
         "url": "album/1Xsprdt1q9rOzTic7b9zYM?"
@@ -34,7 +34,7 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 21:11:00",
+        "lastModified": "2023-07-28 21:29:38",
         "type": "album",
         "name": "Legends Never Die",
         "url": "album/6n9DKpOxwifT5hOXtgLZSL?"
@@ -54,7 +54,7 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 21:11:18",
+        "lastModified": "2023-07-28 21:29:44",
         "type": "album",
         "name": "Fighting Demons ",
         "url": "album/1typPCwqyXMfFpvDZAyKew?"
@@ -74,7 +74,7 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 21:11:36",
+        "lastModified": "2023-07-28 21:29:49",
         "type": "album",
         "name": "Birds In The Trap Sing McKnight",
         "url": "album/42WVQWuf1teDysXiOupIZt?"
@@ -94,7 +94,7 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 21:11:55",
+        "lastModified": "2023-07-28 21:29:54",
         "type": "playlist",
         "name": "This Is Frank Ocean",
         "url": "playlist/37i9dQZF1DXdyjMX5o2vCq?"
@@ -114,7 +114,7 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 21:12:28",
+        "lastModified": "2023-07-28 21:30:02",
         "type": "playlist",
         "name": "This Is Juice WRLD",
         "url": "playlist/37i9dQZF1DZ06evO2O09Hg?"
@@ -134,7 +134,7 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 21:12:54",
+        "lastModified": "2023-07-28 21:30:08",
         "type": "playlist",
         "name": "the things i didn't get to say",
         "url": "playlist/2e7c65Kq8a3zvwE1urfyqy?"
@@ -154,7 +154,7 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 21:13:44",
+        "lastModified": "2023-07-28 21:30:15",
         "type": "playlist",
         "name": "GYM",
         "url": "playlist/5qg539QgtnDUbNwbEjKiI2?"
@@ -174,8 +174,10 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-26 09:10:26",
-        "type": "album"
+        "lastModified": "2023-07-28 21:30:21",
+        "type": "album",
+        "name": "Goodbye & Good Riddance",
+        "url": "album/6tkjU4Umpo79wwkgPMV3nZ?"
     },
     "3mH6qwIy9crq0I9YQbOuDf": {
         "coverDim": 1166,
@@ -192,8 +194,10 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-26 09:31:51",
-        "type": "album"
+        "lastModified": "2023-07-28 21:30:26",
+        "type": "album",
+        "name": "Blonde",
+        "url": "album/3mH6qwIy9crq0I9YQbOuDf?"
     },
     "0S0KGZnfBGSIssfF54WSJh": {
         "coverDim": 1166,
@@ -201,35 +205,39 @@
         "cornerTextSize": 30,
         "artistSize": 57,
         "titleSize": 79,
-        "trackSize": 30,
+        "trackSize": 26,
         "maxLabelLength": 40,
         "maxArtistsLength": 15,
         "maxTitleLength": 11,
         "maxTrackLineWidth": 15,
-        "trackLineSpace": 38,
+        "trackLineSpace": 33,
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-27 15:05:47",
-        "type": "album"
+        "lastModified": "2023-07-28 21:30:31",
+        "type": "album",
+        "name": "WHEN WE ALL FALL ASLEEP, WHERE DO WE GO?",
+        "url": "album/0S0KGZnfBGSIssfF54WSJh?"
     },
     "18NOKLkZETa4sWwLMIm0UZ": {
         "coverDim": 1166,
         "codeDim": 444,
-        "cornerTextSize": 34,
+        "cornerTextSize": 30,
         "artistSize": 57,
-        "titleSize": 110,
-        "trackSize": 30,
+        "titleSize": 79,
+        "trackSize": 26,
         "maxLabelLength": 40,
         "maxArtistsLength": 15,
         "maxTitleLength": 11,
         "maxTrackLineWidth": 15,
-        "trackLineSpace": 37,
+        "trackLineSpace": 33,
         "maxTracks": 30,
-        "sCodePos": 1650,
+        "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 09:49:36",
-        "type": "album"
+        "lastModified": "2023-07-28 21:30:37",
+        "type": "album",
+        "name": "UTOPIA",
+        "url": "album/18NOKLkZETa4sWwLMIm0UZ?"
     },
     "45ppTSZcqg0tzMhoVx1kWG": {
         "coverDim": 1166,
@@ -246,8 +254,10 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 09:57:07",
-        "type": "album"
+        "lastModified": "2023-07-28 21:30:50",
+        "type": "album",
+        "name": "what if it was great?",
+        "url": "album/45ppTSZcqg0tzMhoVx1kWG?"
     },
     "2e0fFyl9yvaVAcML1WoZnl": {
         "coverDim": 1166,
@@ -264,8 +274,10 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 10:12:01",
-        "type": "playlist"
+        "lastModified": "2023-07-28 21:30:56",
+        "type": "playlist",
+        "name": "elijah woods",
+        "url": "playlist/2e0fFyl9yvaVAcML1WoZnl?"
     },
     "4wR20Mkz54hj9CQhPNYYjq": {
         "coverDim": 1166,
@@ -273,17 +285,19 @@
         "cornerTextSize": 30,
         "artistSize": 57,
         "titleSize": 79,
-        "trackSize": 20,
+        "trackSize": 26,
         "maxLabelLength": 40,
         "maxArtistsLength": 15,
         "maxTitleLength": 11,
-        "maxTrackLineWidth": 20,
-        "trackLineSpace": 26,
-        "maxTracks": 37,
+        "maxTrackLineWidth": 15,
+        "trackLineSpace": 33,
+        "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 11:27:15",
-        "type": "playlist"
+        "lastModified": "2023-07-28 21:31:05",
+        "type": "playlist",
+        "name": "good vibes",
+        "url": "playlist/4wR20Mkz54hj9CQhPNYYjq?"
     },
     "5VdyJkLe3yvOs0l4xXbWp0": {
         "coverDim": 1166,
@@ -300,8 +314,10 @@
         "maxTracks": 30,
         "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 13:47:55",
-        "type": "album"
+        "lastModified": "2023-07-28 21:31:10",
+        "type": "album",
+        "name": "17",
+        "url": "album/5VdyJkLe3yvOs0l4xXbWp0?"
     },
     "7vNqlfthayItIbI0Ssmfoa": {
         "coverDim": 1166,
@@ -309,17 +325,19 @@
         "cornerTextSize": 30,
         "artistSize": 57,
         "titleSize": 79,
-        "trackSize": 21,
+        "trackSize": 26,
         "maxLabelLength": 40,
         "maxArtistsLength": 15,
         "maxTitleLength": 11,
-        "maxTrackLineWidth": 17,
-        "trackLineSpace": 28,
+        "maxTrackLineWidth": 15,
+        "trackLineSpace": 33,
         "maxTracks": 30,
-        "sCodePos": 1670,
+        "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 13:49:27",
-        "type": "album"
+        "lastModified": "2023-07-28 21:31:14",
+        "type": "album",
+        "name": "LOOK AT ME: THE ALBUM",
+        "url": "album/7vNqlfthayItIbI0Ssmfoa?"
     },
     "2Ti79nwTsont5ZHfdxIzAm": {
         "coverDim": 1166,
@@ -331,13 +349,15 @@
         "maxLabelLength": 40,
         "maxArtistsLength": 15,
         "maxTitleLength": 11,
-        "maxTrackLineWidth": 17,
+        "maxTrackLineWidth": 15,
         "trackLineSpace": 33,
         "maxTracks": 30,
-        "sCodePos": 1650,
+        "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 13:51:34",
-        "type": "album"
+        "lastModified": "2023-07-28 21:31:18",
+        "type": "album",
+        "name": "?",
+        "url": "album/2Ti79nwTsont5ZHfdxIzAm?"
     },
     "3hn46RDrEmoi4XhLjgdNjZ": {
         "coverDim": 1166,
@@ -349,13 +369,15 @@
         "maxLabelLength": 40,
         "maxArtistsLength": 15,
         "maxTitleLength": 11,
-        "maxTrackLineWidth": 17,
+        "maxTrackLineWidth": 15,
         "trackLineSpace": 33,
         "maxTracks": 30,
-        "sCodePos": 1650,
+        "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 13:53:26",
-        "type": "album"
+        "lastModified": "2023-07-28 21:31:23",
+        "type": "album",
+        "name": "Bad Vibes Forever",
+        "url": "album/3hn46RDrEmoi4XhLjgdNjZ?"
     },
     "2c6s84YTwR9cfncPmB9fNW": {
         "coverDim": 1166,
@@ -363,17 +385,19 @@
         "cornerTextSize": 30,
         "artistSize": 57,
         "titleSize": 79,
-        "trackSize": 16,
+        "trackSize": 26,
         "maxLabelLength": 40,
         "maxArtistsLength": 15,
         "maxTitleLength": 11,
-        "maxTrackLineWidth": 27,
-        "trackLineSpace": 21,
-        "maxTracks": 40,
-        "sCodePos": 1650,
-        "includeFullTitle": 1,
-        "lastModified": "2023-07-28 14:01:14",
-        "type": "album"
+        "maxTrackLineWidth": 15,
+        "trackLineSpace": 33,
+        "maxTracks": 30,
+        "sCodePos": 1736,
+        "includeFullTitle": 0,
+        "lastModified": "2023-07-28 21:31:28",
+        "type": "album",
+        "name": "? ",
+        "url": "album/2c6s84YTwR9cfncPmB9fNW?"
     },
     "6r1lh7fHMB499vGKtIyJLy": {
         "coverDim": 1166,
@@ -381,16 +405,18 @@
         "cornerTextSize": 30,
         "artistSize": 57,
         "titleSize": 79,
-        "trackSize": 24,
+        "trackSize": 26,
         "maxLabelLength": 40,
         "maxArtistsLength": 15,
         "maxTitleLength": 11,
-        "maxTrackLineWidth": 20,
-        "trackLineSpace": 31,
+        "maxTrackLineWidth": 15,
+        "trackLineSpace": 33,
         "maxTracks": 30,
-        "sCodePos": 1650,
+        "sCodePos": 1736,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 14:20:38",
-        "type": "album"
+        "lastModified": "2023-07-28 21:31:34",
+        "type": "album",
+        "name": "AUSTIN",
+        "url": "album/6r1lh7fHMB499vGKtIyJLy?"
     }
 }

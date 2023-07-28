@@ -234,7 +234,8 @@ def posterHistory():
 def walgreens():
 
     with open(f"static\\PosterStorage\\user{str(current_user.id)}\\data.json", 'r+') as handle:
-        posters: list[tuple[str, str]] = [(item['url'], item['name']) for item in json.load(handle)]
+        data:dict = json.load(handle)
+        posters: list[tuple] = [(data[item]['url'], data[item]['name']) for item in data]
         handle.close()
         
     return render_template("walgreens.html", 

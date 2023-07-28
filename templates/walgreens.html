@@ -58,10 +58,20 @@
             
             </div>
             <div class="row">
-                <form action="{{ url_for('makeOrder') }}">
+                <div class="col-md-3 text-left">
+                    <label for="one">Select Poster 1</label>
+                </div>
+                <div class="col-md-3 text-left">
+                    <label for="two">Select Poster 2</label>
+                </div>
+                <div class="col-md-3 text-left">
+                    <label for="three">Select Poster 3</label>
+                </div>
+            </div>
+            <div class="row">
+                <form action="{{ url_for('makeOrder') }}" method="post", enctype="multipart/form-data" id="main"></form>
                     <div class="col-md-3 text-left">
-                        <label for="one">Select Poster 1</label>
-                        <select name="poster1" id="one">
+                        <select name="poster1" id="one" form="main" class="form-control">
                             {% if posterNames %}
                                 {% for poster in posterNames %}
                                     <option value="{{ poster[0] }}">{{ poster[1] }}</option>
@@ -70,8 +80,7 @@
                         </select>
                     </div>
                     <div class="col-md-3 text-left">
-                        <label for="two">Select Poster 2</label>
-                        <select name="poster2" id="two">
+                        <select name="poster2" id="two" form="main" class="form-control">
                             {% if posterNames %}
                                 {% for poster in posterNames %}
                                     <option value="{{ poster[0] }}">{{ poster[1] }}</option>
@@ -80,8 +89,7 @@
                         </select>
                     </div>
                     <div class="col-md-3 text-left">
-                        <label for="three">Select Poster 3</label>
-                        <select name="poster3" id="three">
+                        <select name="poster3" id="three" form="main" class="form-control">
                             {% if posterNames %}
                                 {% for poster in posterNames %}
                                     <option value="{{ poster[0] }}">{{ poster[1] }}</option>
@@ -90,9 +98,9 @@
                         </select>
                     </div>
                     <div class="col-md-3 text-left">
-                        <button type="submit" class="btn btn-primary">Create 16x20 Poster</button>
+                        <button type="submit" class="btn btn-primary" form="main">Create 16x20 Poster</button>
                     </div>
-                </form>
+                <!-- </form> -->
             </div>
         </div>
         
