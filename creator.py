@@ -403,8 +403,10 @@ def writeTracks(draw: ImageDraw, details: dict):
     TRACKX1 = 126
     TRACKX2 = 442
     column = 1
+    notEnough = False
     for track in trackList:
         if i > defaultParams['maxTracks']:
+            notEnough = True
             break
         try:
             pIndex = track.index("(")
@@ -428,7 +430,7 @@ def writeTracks(draw: ImageDraw, details: dict):
             else:
                 # if this is the first word in a line, it will therefore take up the whole line
                 if build == "":
-                    print("Entered special case for ", words[0])
+                    # print("Entered special case for ", words[0])
                     build = words[0]
                     while len(build) > defaultParams['maxTrackLineWidth']:
                         parts.append(build[:defaultParams['maxTrackLineWidth']])
@@ -464,6 +466,13 @@ def writeTracks(draw: ImageDraw, details: dict):
         
         i += 1
 
+    if notEnough:
+        if column == 1:
+            draw.text((TRACKX1, nextY), ". . .", (0,0,0), font=trackFont, anchor = 'lt')
+        else:
+            draw.text((TRACKX2, nextY), ". . .", (0,0,0), font=trackFont, anchor = 'lt')
+
+
 def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFolder: str = "", colors: list[list[int]] = None):
     details = getAlbumDetails(url)
 
@@ -472,15 +481,18 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
 
     # Full canvas
     bar.setStatus("Creating canvas ... ")
+    bar.update()
     canvas = Image.new('RGBA', (1333,2000), (255,255,255))
     bar.next()
     # Getting album cover (640x640)
     bar.setStatus("Getting album cover ... ")
+    bar.update()
     albumCover = getCover(details['coverURL'], 'album')
     canvas.paste(albumCover, (83,83))
     bar.next()
     # getting spotify code
     bar.setStatus("Getting spotify code ... ")
+    bar.update()
     sCode = getSpotifyCode(url, 'album')
     canvas.paste(sCode, (805,defaultParams['sCodePos']))
     bar.next()
@@ -489,6 +501,7 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
 
     # handling color squares
     bar.setStatus("Generating colors squares ... ")
+    bar.update()
     if colors:
         # print("Colors passed in from database")
         sortedRGB = sorted(colors, key=lambda triple: sum(triple))
@@ -508,21 +521,25 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
 
     # Handling Label & Album Length
     bar.setStatus("Writing album info ... ")
+    bar.update()
     draw = ImageDraw.Draw(canvas)
     writeText(draw, details)
     bar.next()
 
     # Handling tracks
     bar.setStatus("Writing album tracks ... ")
+    bar.update()
     writeTracks(draw, details)
     bar.next()
 
     # save temporary full-size copy
     bar.setStatus("Saving album poster ... ")
+    bar.update()
     canvas.save(f"static/PosterStorage{saveFolder}/poster.png")
     bar.next()
     # saving permanent thumbnail copy for lesser storage use
     bar.setStatus("Saving thumbnail copy ... ")
+    bar.update()
     thumbnail = cv2.imread(f"static/PosterStorage{saveFolder}/poster.png")
     thumbnail = cv2.resize(thumbnail, (500, 750), interpolation=cv2.INTER_LANCZOS4)
     cv2.imwrite(f"static/PosterStorage{saveFolder}/{details['id']}.png", thumbnail)
@@ -530,6 +547,7 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
 
     # print("Returning from handleURL: ", returning)
     bar.setStatus("Writing to data.json ... ")
+    bar.update()
     with open(f"static/PosterStorage{saveFolder}/data.json", 'r+') as handle:
         data: dict = json.load(handle)
         data[details['id']] = params
@@ -551,15 +569,18 @@ def createPlaylistPoster(url: str, params: dict[str, int] = defaultParams, saveF
 
     # Full canvas
     bar.setStatus("Creating canvas ... ")
+    bar.update()
     canvas = Image.new('RGBA', (1333,2000), (255,255,255))
     bar.next()
     # Getting album cover (640x640)
     bar.setStatus("Getting playlist cover ... ")
+    bar.update()
     playCover = getCover(details['coverURL'], 'playlist')
     canvas.paste(playCover, (83,83))
     bar.next()
     # getting spotify code
     bar.setStatus("Getting spotify code ... ")
+    bar.update()
     sCode = getSpotifyCode(url, 'playlist')
     canvas.paste(sCode, (805,defaultParams['sCodePos']))
     bar.next()
@@ -568,6 +589,7 @@ def createPlaylistPoster(url: str, params: dict[str, int] = defaultParams, saveF
 
     # handling color squares
     bar.setStatus("Generating colors squares ... ")
+    bar.update()
     if colors:
         # print("Colors passed in from database")
         sortedRGB = sorted(colors, key=lambda triple: sum(triple))
@@ -587,21 +609,25 @@ def createPlaylistPoster(url: str, params: dict[str, int] = defaultParams, saveF
 
     # Handling Label & Album Length
     bar.setStatus("Writing playlist info ... ")
+    bar.update()
     draw = ImageDraw.Draw(canvas)
     writePlaylistText(draw, details)
     bar.next()
 
     # Handling tracks
     bar.setStatus("Writing playlist tracks ... ")
+    bar.update()
     writeTracks(draw, details)
     bar.next()
 
     # save temporary full-size copy
     bar.setStatus("Saving playlist poster ... ")
+    bar.update()
     canvas.save(f"static/PosterStorage{saveFolder}/poster.png")
     bar.next()
     # saving permanent thumbnail copy for lesser storage use
     bar.setStatus("Saving thumbnail copy ... ")
+    bar.update()
     thumbnail = cv2.imread(f"static/PosterStorage{saveFolder}/poster.png")
     thumbnail = cv2.resize(thumbnail, (500, 750), interpolation=cv2.INTER_LANCZOS4)
     cv2.imwrite(f"static/PosterStorage{saveFolder}/{details['id']}.png", thumbnail)
@@ -609,6 +635,7 @@ def createPlaylistPoster(url: str, params: dict[str, int] = defaultParams, saveF
 
     # print("Returning from handleURL: ", returning)
     bar.setStatus("Writing to data.json ... ")
+    bar.update()
     with open(f"static/PosterStorage{saveFolder}/data.json", 'r+') as handle:
         data: dict = json.load(handle)
         data[details['id']] = params
