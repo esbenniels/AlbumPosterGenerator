@@ -62,15 +62,6 @@ def create_app():
     def load_user(user_id):
         # since the user_id is just the primary key of our user table, use it in the query for the user
         return db.session.get(User, int(user_id))
-    # User.query.get(int(user_id))
-
-    # # blueprint for auth routes in our app
-    # from auth import auth as auth_blueprint
-    # app.register_blueprint(auth_blueprint)
-
-    # # blueprint for non-auth parts of app
-    # from server import server as server_blueprint
-    # app.register_blueprint(server_blueprint)
 
     with app.app_context():
         db.create_all()
@@ -135,7 +126,6 @@ def urlSubmit():
         # print("Passing Parameters: ", newParams)
 
         a = db.session.get(Album, albumID)
-        # Album.query.filter_by(id = albumID).first()
         if a:
             colors = [[a.r1, a.g1, a.b1],[a.r2, a.g2, a.b2],[a.r3, a.g3, a.b3],[a.r4, a.g4, a.b4],[a.r5, a.g5, a.b5]]
             handleURL(url, newParams, "/user"+str(current_user.id), colors)
@@ -238,6 +228,22 @@ def posterHistory():
                         current_user = current_user,
                         #    albumNames = albumPlaylistNames
                     )
+
+@app.route("/walgreens", methods=['POST', 'GET'])
+@login_required
+def walgreens():
+
+    with open(f"static\\PosterStorage\\user{str(current_user.id)}\\data.json", 'r+') as handle:
+        posters: list[tuple[str, str]] = [(item['url'], item['name']) for item in json.load(handle)]
+        handle.close()
+        
+    return render_template("walgreens.html", 
+                           posterNames = posters)
+
+@app.route("/makeOrder", methods=['POST','GET'])
+@login_required
+def makeOrder():
+    return redirect(url_for("walgreens"))
 
 @app.route('/login')
 def login():

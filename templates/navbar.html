@@ -12,6 +12,9 @@
             <li>
                 <a href="{{ url_for('posterHistory') }}">Your Posters</a>
             </li>
+            <li>
+                <a href="{{ url_for('walgreens') }}">Generate 16x20</a>
+            </li>
             {% endif %}
             {% if not current_user.is_authenticated %}
             <li>

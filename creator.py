@@ -553,9 +553,12 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
         data[details['id']] = params
         data[details['id']]['lastModified'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data[details['id']]['type'] = "album"
+        data[details['id']]['name'] = details['name']
+        id=re.findall('album/(.*)\?', url)[0]
+        data[details['id']]['url'] = f"album/{id}?"
         handle.close()
     with open(f"static/PosterStorage{saveFolder}/data.json", 'w+') as handle:
-        json.dump(data, handle)
+        handle.write(json.dumps(data, indent=4))
         handle.close()
     bar.next()
     bar.finish()
@@ -641,9 +644,12 @@ def createPlaylistPoster(url: str, params: dict[str, int] = defaultParams, saveF
         data[details['id']] = params
         data[details['id']]['lastModified'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data[details['id']]['type'] = "playlist"
+        data[details['id']]['name'] = details['name']
+        id=re.findall('playlist/(.*)\?', url)[0]
+        data[details['id']]['url'] = f"playlist/{id}?"
         handle.close()
     with open(f"static/PosterStorage{saveFolder}/data.json", 'w+') as handle:
-        json.dump(data, handle)
+        handle.write(json.dumps(data, indent=4))
         handle.close()
     bar.next()
     bar.finish()
