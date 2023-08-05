@@ -71,7 +71,7 @@
             <div class="row">
                 <form action="{{ url_for('makeOrder') }}" method="post", enctype="multipart/form-data" id="main"></form>
                     <div class="col-md-3 text-left">
-                        <select name="poster1" id="one" form="main" class="form-control">
+                        <select name="poster1" id="one" form="main" class="form-control" required>
                             {% if posterNames %}
                                 {% for poster in posterNames %}
                                     <option value="{{ poster[0] }}">{{ poster[1] }}</option>
@@ -80,7 +80,7 @@
                         </select>
                     </div>
                     <div class="col-md-3 text-left">
-                        <select name="poster2" id="two" form="main" class="form-control">
+                        <select name="poster2" id="two" form="main" class="form-control" required>
                             {% if posterNames %}
                                 {% for poster in posterNames %}
                                     <option value="{{ poster[0] }}">{{ poster[1] }}</option>
@@ -89,7 +89,7 @@
                         </select>
                     </div>
                     <div class="col-md-3 text-left">
-                        <select name="poster3" id="three" form="main" class="form-control">
+                        <select name="poster3" id="three" form="main" class="form-control"required>
                             {% if posterNames %}
                                 {% for poster in posterNames %}
                                     <option value="{{ poster[0] }}">{{ poster[1] }}</option>
@@ -101,6 +101,15 @@
                         <button type="submit" class="btn btn-primary" form="main">Create 16x20 Poster</button>
                     </div>
                 <!-- </form> -->
+            </div>
+            <br>
+            <br>
+            <div class="row">
+                <div class="col-md-12">
+                    {% if imageFile %}
+                    <img src="{{ url_for('static', filename = imageFile) }}" style="border: 5px solid black; max-width: 100%;">
+                    {% endif %}
+                </div>
             </div>
         </div>
         

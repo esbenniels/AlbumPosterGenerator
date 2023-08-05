@@ -1,7 +1,6 @@
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import os, re, json
-import matplotlib.image as img
 from datetime import datetime, timedelta
 import cv2
 import binascii
@@ -46,7 +45,8 @@ class ProgressBar(Bar):
         return self.status
 
 
-def handleURL(url: str, params: dict[str, int] = defaultParams, saveFolder: str = "", colors: list[tuple[int, int, int]] = None):
+def handleURL(url: str, params: dict[str, int] = defaultParams, saveFolder: str = "", 
+              colors: list[tuple[int, int, int]] = None) -> None | list[list[int]] | str:
     global bar, startTime
     bar = ProgressBar(max=9)
     if "album" in url:
@@ -246,7 +246,7 @@ def getLength(trackStruct: list[dict]) -> str:
     hr = delta.seconds // 3600
     return f"{hr:02d}.{min:02d}.{sec:02d}"
 
-def writeText(draw: ImageDraw, details: dict):
+def writeText(draw: ImageDraw, details: dict) -> None:
     boldText = ImageFont.truetype('SourceSans3-ExtraBold.ttf', defaultParams['cornerTextSize'])
     artistFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['artistSize'])
     titleFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['titleSize'])
@@ -302,7 +302,7 @@ def writeText(draw: ImageDraw, details: dict):
         for j in range(len(parts)):
             draw.text((1250, 1435 + (j*82)), f"{parts[j]}", (0,0,0), font=titleFont, anchor='rt')
 
-def writePlaylistText(draw: ImageDraw, details: dict):
+def writePlaylistText(draw: ImageDraw, details: dict) -> None:
     boldText = ImageFont.truetype('SourceSans3-ExtraBold.ttf', defaultParams['cornerTextSize'])
     artistFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['artistSize'])
     titleFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['titleSize'])
@@ -393,7 +393,7 @@ def writePlaylistText(draw: ImageDraw, details: dict):
         for j in range(len(parts)):
             draw.text((1250, 1435 + (j*82)), f"{parts[j]}", (0,0,0), font=titleFont, anchor='rt')
     
-def writeTracks(draw: ImageDraw, details: dict):
+def writeTracks(draw: ImageDraw, details: dict) -> None:
     trackFont = ImageFont.truetype("AtkinsonHyperlegible-Bold.ttf", defaultParams['trackSize'])
     trackList: list[str] = [song['name'].upper() for song in details['tracks']]
     i = 1
@@ -473,7 +473,9 @@ def writeTracks(draw: ImageDraw, details: dict):
             draw.text((TRACKX2, nextY), ". . .", (0,0,0), font=trackFont, anchor = 'lt')
 
 
-def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFolder: str = "", colors: list[list[int]] = None):
+def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, 
+                      saveFolder: str = "", 
+                      colors: list[list[int]] = None) -> None | list[list[int]]:
     details = getAlbumDetails(url)
 
     global defaultParams, bar
@@ -564,7 +566,9 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams, saveFold
     bar.finish()
     return returning
 
-def createPlaylistPoster(url: str, params: dict[str, int] = defaultParams, saveFolder: str = "", colors: list[list[int]] = None):
+def createPlaylistPoster(url: str, params: dict[str, int] = defaultParams, 
+                         saveFolder: str = "", 
+                         colors: list[list[int]] = None) -> None | list[list[int]]:
     details = getPlaylistDetails(url)
 
     global defaultParams, bar
@@ -656,3 +660,11 @@ def createPlaylistPoster(url: str, params: dict[str, int] = defaultParams, saveF
     return returning
 
     # https://open.spotify.com/playlist/37i9dQZF1DXdyjMX5o2vCq?si=eeb678ba212b4b71
+
+
+def create16x20(im1: Image, im2: Image, im3: Image, saveFolder: str = "") -> None:
+    canvas = Image.new('RGBA', (2666,3333), (255,255,255))
+    canvas.paste(Image.fromarray(np.asarray(im1)), (0,0))
+    canvas.paste(Image.fromarray(np.asarray(im2)), (1333, 0))
+    canvas.paste(Image.fromarray(np.asarray(im3)).rotate(90, expand=True), (333, 2000))
+    canvas.save(f"static/PosterStorage{saveFolder}/16x20.png")

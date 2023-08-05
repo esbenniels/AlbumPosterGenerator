@@ -3,12 +3,13 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from flask_mobility import Mobility
-from creator import handleURL, defaultParams
+import creator
 from werkzeug.security import generate_password_hash, check_password_hash
 import os, re, json
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import datetime
+from PIL import Image
 
 os.environ['SPOTIPY_CLIENT_ID'] = '56c47550643e42b9a6ab2aa821fe394c'
 os.environ['SPOTIPY_CLIENT_SECRET'] = '0f26f4b32912427ca59b7c62d8c36b5a'
@@ -43,7 +44,7 @@ class Album(db.Model):
 
 
 
-def create_app():
+def create_app() -> Flask:
     app = Flask(__name__)
     CORS(app)
     Mobility(app)
@@ -75,7 +76,7 @@ app = create_app()
 @app.route("/index", methods=['POST', 'GET'])
 @login_required
 def index():
-    return render_template("index.html", current_user = current_user, defaultParams=defaultParams, dp = defaultParams)
+    return render_template("index.html", current_user = current_user, defaultParams=creator.defaultParams, dp = creator.defaultParams)
 
 @app.route("/urlSubmit", methods=['POST', 'GET'])
 @login_required
@@ -93,12 +94,12 @@ def urlSubmit():
             except:
                 print("regex fail")
                 flash("REDInvalid Spotify album URL. Try copying the link from Spotify's share options")
-                return render_template("index.html", current_user=current_user, defaultParams = defaultParams, dp = defaultParams)
+                return render_template("index.html", current_user=current_user, defaultParams = creator.defaultParams, dp = creator.defaultParams)
 
         if len(albumID) != 22:
             print("idLength fail")
             flash("REDInvalid Spotify album URL. Try copying the link from Spotify's share options.")
-            return render_template("index.html", current_user=current_user, defaultParams = defaultParams, dp = defaultParams)
+            return render_template("index.html", current_user=current_user, defaultParams = creator.defaultParams, dp = creator.defaultParams)
 
         try:
             results = spotify.album(albumID)
@@ -107,10 +108,10 @@ def urlSubmit():
                 results = spotify.playlist(albumID)
             except:
                 flash("REDError retrieving Spotify Album. Check URL")
-                return render_template("index.html", current_user=current_user, defaultParams = defaultParams, dp = defaultParams)
+                return render_template("index.html", current_user=current_user, defaultParams = creator.defaultParams, dp = creator.defaultParams)
         
         newParams = {}
-        for field in defaultParams:
+        for field in creator.defaultParams:
             if field == "includeFullTitle":
                 # checkbox field found
                 if request.form.get(field, None):
@@ -118,19 +119,22 @@ def urlSubmit():
                 else:
                     newParams[field] = 0
                 continue
-            if not request.form.get(field, None) or request.form.get(field, None) == defaultParams[field]:
-                newParams[field] = int(defaultParams[field])
-            else:
-                newParams[field] = int(request.form.get(field))
+            try:
+                if not request.form.get(field, None) or request.form.get(field, None) == creator.defaultParams[field]:
+                    newParams[field] = int(creator.defaultParams[field])
+                else:
+                    newParams[field] = int(request.form.get(field))
+            except:
+                continue
 
         # print("Passing Parameters: ", newParams)
 
         a = db.session.get(Album, albumID)
         if a:
             colors = [[a.r1, a.g1, a.b1],[a.r2, a.g2, a.b2],[a.r3, a.g3, a.b3],[a.r4, a.g4, a.b4],[a.r5, a.g5, a.b5]]
-            handleURL(url, newParams, "/user"+str(current_user.id), colors)
+            creator.handleURL(url, newParams, "/user"+str(current_user.id), colors)
         else:
-            colors = handleURL(url, newParams, "/user"+str(current_user.id))
+            colors = creator.handleURL(url, newParams, "/user"+str(current_user.id))
             # print("Colors received in app.py: ", colors)
             for i in range(len(colors), 5):
                 colors.insert(i, [255,255,255])
@@ -148,14 +152,14 @@ def urlSubmit():
                                posterPath = "PosterStorage/user"+str(current_user.id)+f"/poster.png",
                                defaultParams = newParams,
                                lastAlbum = url, 
-                               dp = defaultParams)
+                               dp = creator.defaultParams)
 
 @app.route("/posterHistory", methods=['POST', 'GET'])
 @login_required
 def posterHistory():
 
     posterNames = os.listdir(f"static\\PosterStorage\\user{str(current_user.id)}")
-    posterNames = [file for file in posterNames if file.__contains__('.png') and not file.__contains__("poster")]
+    posterNames = [file for file in posterNames if file.__contains__('.png') and not file.__contains__("poster") and not file.__contains__('16x20')]
 
     paramDict = {}
     with open(f"static/PosterStorage/user{str(current_user.id)}/data.json", 'r+') as handle:
@@ -164,7 +168,7 @@ def posterHistory():
             if not poster.__contains__("poster"):
                 paramDict[poster] = data[poster.replace('.png','')]
         handle.close()
-
+    print(posterNames)
     numRows = (len(posterNames)//4)+1 if len(posterNames) > 0 else 0
 
     # print("Posters: ", posterNames)
@@ -216,17 +220,17 @@ def posterHistory():
         ]
         handle.close()
 
-    bigStruct = sorted(bigStruct, key = lambda block: datetime.datetime.strptime(block['lastModified'], "%Y-%m-%d %H:%M:%S"), reverse=True)
+    bigStruct = sorted(bigStruct, 
+        key = lambda block: datetime.datetime.strptime(block['lastModified'], 
+                "%Y-%m-%d %H:%M:%S"), 
+        reverse=True)
 
     return render_template("posters.html",
-                        #    posterNames = posterNames,
                         allData = bigStruct,
                         numPosters = len(posterNames),
-                        #    paramDict = paramDict,
                         numRows = numRows,
                         numColumns = numColumns,
                         current_user = current_user,
-                        #    albumNames = albumPlaylistNames
                     )
 
 @app.route("/walgreens", methods=['POST', 'GET'])
@@ -244,7 +248,34 @@ def walgreens():
 @app.route("/makeOrder", methods=['POST','GET'])
 @login_required
 def makeOrder():
-    return redirect(url_for("walgreens"))
+    # print("make order received")
+    with open(f"static\\PosterStorage\\user{str(current_user.id)}\\data.json", 'r+') as handle:
+        data:dict = json.load(handle)
+        posters: list[tuple] = [(data[item]['url'], data[item]['name']) for item in data]
+        handle.close()
+    urls: list[str] = [request.form.get("poster1"), request.form.get("poster2"), request.form.get("poster3")]
+    ids = [url[url.index("/")+1:url.index("?")] for url in urls]
+    colors: list[list[list[int]]] = []
+    for id in ids:
+        a = db.session.get(Album, id)
+        if a:
+            colors.append([[a.r1, a.g1, a.b1],[a.r2, a.g2, a.b2],[a.r3, a.g3, a.b3],[a.r4, a.g4, a.b4],[a.r5, a.g5, a.b5]])
+            # print([[a.r1, a.g1, a.b1],[a.r2, a.g2, a.b2],[a.r3, a.g3, a.b3],[a.r4, a.g4, a.b4],[a.r5, a.g5, a.b5]])
+        else:
+            colors.append(None)
+    # print(url for url in urls)
+    # print(id for id in ids)
+    images: list = []
+    for i in range(len(urls)):
+        creator.handleURL(urls[i], data[ids[i]], "/user"+str(current_user.id), colors[i])
+        poster = Image.open(f"static\\PosterStorage\\user{str(current_user.id)}\\poster.png")
+        poster.save(f"static\\PosterStorage\\user{str(current_user.id)}\\poster{i}.png")
+        newPoster = Image.open(f"static\\PosterStorage\\user{str(current_user.id)}\\poster{i}.png")
+        images.append(newPoster)
+    creator.create16x20(images[0], images[1], images[2], "/user"+str(current_user.id))
+    return render_template("walgreens.html",
+                           posterNames = posters,
+                           imageFile = "PosterStorage/user"+str(current_user.id)+f"/16x20.png",)
 
 @app.route('/login')
 def login():
@@ -323,4 +354,3 @@ def logout():
 
 
 app.run(host = '0.0.0.0')
-
