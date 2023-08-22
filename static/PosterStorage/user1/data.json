@@ -192,9 +192,9 @@
         "maxTrackLineWidth": 15,
         "trackLineSpace": 33,
         "maxTracks": 30,
-        "sCodePos": 1736,
+        "sCodePos": 1650,
         "includeFullTitle": 0,
-        "lastModified": "2023-07-28 21:30:26",
+        "lastModified": "2023-08-08 00:22:00",
         "type": "album",
         "name": "Blonde",
         "url": "album/3mH6qwIy9crq0I9YQbOuDf?"
@@ -478,5 +478,25 @@
         "type": "album",
         "name": "Death Race For Love ",
         "url": "album/1btu0SV2DOI5HoFsvUd78F?"
+    },
+    "7txGsnDSqVMoRl6RQ9XyZP": {
+        "coverDim": 1166,
+        "codeDim": 444,
+        "cornerTextSize": 30,
+        "artistSize": 57,
+        "titleSize": 79,
+        "trackSize": 26,
+        "maxLabelLength": 40,
+        "maxArtistsLength": 15,
+        "maxTitleLength": 11,
+        "maxTrackLineWidth": 15,
+        "trackLineSpace": 33,
+        "maxTracks": 30,
+        "sCodePos": 1650,
+        "includeFullTitle": 0,
+        "lastModified": "2023-08-08 00:19:30",
+        "type": "album",
+        "name": "HEROES & VILLAINS",
+        "url": "album/7txGsnDSqVMoRl6RQ9XyZP?"
     }
 }
