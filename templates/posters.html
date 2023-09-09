@@ -345,13 +345,13 @@
                 <div class="row">
                     {% for j in range(numColumns[i]) %}
                     <div class="col-md-3 text-center">
-                        <form action="{{ url_for('urlSubmit') }}" method="post" enctype="multipart/form-data" id="234">
+                        <form action="{{ url_for('urlSubmit') }}" method="post" enctype="multipart/form-data">
                             {% if allData[4*i+j]['type'] == 'album' %}
                                 <input type="text" id="url" name="SpotifyUrl" class="form-control"
-                                value="{{ 'https://open.spotify.com/album/'+allData[4*i+j]['file'].replace('.png','')+'?' }}" style="display: none;" form="234">
+                                value="{{ 'https://open.spotify.com/album/'+allData[4*i+j]['file'].replace('.png','')+'?' }}" style="display: none;">
                             {% elif allData[4*i+j]['type'] == 'playlist' %}
                                 <input type="text" id="url" name="SpotifyUrl" class="form-control"
-                                value="{{ 'https://open.spotify.com/playlist/'+allData[4*i+j]['file'].replace('.png','')+'?' }}" style="display: none;" form="234">
+                                value="{{ 'https://open.spotify.com/playlist/'+allData[4*i+j]['file'].replace('.png','')+'?' }}" style="display: none;">
                             {% endif %}
                         
                             <input type="number" id="coverDim" name="coverDim" class="form-control"
