@@ -81,6 +81,7 @@ def index():
 @app.route("/urlSubmit", methods=['POST', 'GET'])
 @login_required
 def urlSubmit():
+    print("DefaultParams before: ", creator.defaultParams)
     if request.method == 'GET':
         return redirect(url_for('index'))
     else:
@@ -148,6 +149,7 @@ def urlSubmit():
             db.session.commit()
 
         flash("GREENAlbum poster successfully generated")
+        print("DefaultParams before: ", creator.defaultParams)
         return render_template("index.html", current_user = current_user, 
                                posterPath = "PosterStorage/user"+str(current_user.id)+f"/poster.png",
                                defaultParams = newParams,

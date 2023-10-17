@@ -479,7 +479,7 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams,
     details = getAlbumDetails(url)
 
     global defaultParams, bar
-    defaultParams = params
+    # defaultParams = params
 
     # Full canvas
     bar.setStatus("Creating canvas ... ")
