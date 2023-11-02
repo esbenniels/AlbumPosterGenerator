@@ -204,7 +204,7 @@
         "codeDim": 444,
         "cornerTextSize": 30,
         "artistSize": 57,
-        "titleSize": 79,
+        "titleSize": 90,
         "trackSize": 30,
         "maxLabelLength": 40,
         "maxArtistsLength": 15,
@@ -214,7 +214,7 @@
         "maxTracks": 30,
         "sCodePos": 1650,
         "includeFullTitle": 0,
-        "lastModified": "2023-10-28 15:58:13",
+        "lastModified": "2023-11-02 15:36:34",
         "type": "album",
         "name": "UTOPIA",
         "url": "album/18NOKLkZETa4sWwLMIm0UZ?"
