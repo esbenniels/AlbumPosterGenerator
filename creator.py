@@ -34,6 +34,8 @@ defaultParams = {
     "includeFullTitle": 0
 }
 
+DEFAULT = defaultParams
+
 class ProgressBar(Bar):
     message = "Generating Album Poster ... "
     fill = "#"
@@ -479,7 +481,9 @@ def createAlbumPoster(url: str, params: dict[str, int] = defaultParams,
     details = getAlbumDetails(url)
 
     global defaultParams, bar
-    # defaultParams = params
+    defaultParams = params
+
+    # print("Generating album poster with: ", params)
 
     # Full canvas
     bar.setStatus("Creating canvas ... ")
